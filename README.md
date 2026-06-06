@@ -1,19 +1,17 @@
 # COMP47910 - Secure Software Engineering 2026
 
 ## Yasir Celtik
- 
+
 ## Assignment 1 - Prompt Vault
 
-
-
 In this assignment, you will develop a simplified web application called
-PromptVault using Spring Boot. PromptVault is a secure prompt management
-system where users can create, store, organise, and submit prompts to a 
+**PromptVault** using **Spring Boot.** PromptVault is a secure prompt management
+system where users can create, store, organise, and submit prompts to a
 simulated AI assistant.
 The project focuses on implementing core features such as user registration,
 prompt management, simulated AI requests, and reviewing prompts that may contain
 sensitive information. The project, at this stage WILL NOT require you to
-consider the security aspects of the application, including authentication, 
+consider the security aspects of the application, including authentication,
 access control, input validation, and protection of sensitive data.
 The application does not need to integrate with a real AI service. You can
 simulate the AI response by returning a predefined message such as:
@@ -23,125 +21,140 @@ Alternatively, you can generate a simple response based on the submitted prompt.
 You are not required to use any external AI API.
 
 ### Required Functionalities for Admin
-- [ ]**Log in and log out of the system.** You can assume that admins are already
-  registered with a predefined username and password. So, they will only need
-  to perform login and logout operations.
+
+- [ ] **Log in and log out of the system.** You can assume that admins are already
+      registered with a predefined username and password. So, they will only need
+      to perform login and logout operations.
 - [ ] **Manage users.** After logging in, an admin can view the list of registered
-  users. Each user should include username, email address, role, and account
-  status. The admin should be able to enable or disable a user account.
+      users. Each user should include username, email address, role, and account
+      status. The admin should be able to enable or disable a user account.
 - [ ] **Manage prompt categories.**
-  After logging in, an admin can add, edit, and delete prompt categories. Each
-  category should include the category name and description. Examples of 
-  categories include:
-    - Coding;
-    - Research;
-    - Cybersecurity;
-    - Legal;
-    - HR;
-    - Personal productivity.
+      After logging in, an admin can add, edit, and delete prompt categories. Each
+      category should include the category name and description. Examples of
+      categories include:
+  - Coding;
+  - Research;
+  - Cybersecurity;
+  - Legal;
+  - HR;
+  - Personal productivity.
 
 - [ ] **Manage policy keywords.**
-  After logging in, an admin can add, edit, and delete policy keywords. These
-  keywords will be used to identify prompts that may contain sensitive 
-  information. Examples of policy keywords include: password; API key; secret;
-  credit card; private key; confidential; medical record; student number.
+      After logging in, an admin can add, edit, and delete policy keywords. These
+      keywords will be used to identify prompts that may contain sensitive
+      information. Examples of policy keywords include: password; API key; secret;
+      credit card; private key; confidential; medical record; student number.
 
 - [ ] **View flagged prompts.**
-  After logging in, an admin can view prompts that have been flagged because
-  they contain one or more policy keywords. For each flagged prompt, the admin
-  should be able to see the prompt title, prompt owner, category, flagged 
-  keyword, and date of submission.
+      After logging in, an admin can view prompts that have been flagged because
+      they contain one or more policy keywords. For each flagged prompt, the admin
+      should be able to see the prompt title, prompt owner, category, flagged
+      keyword, and date of submission.
 
 ### **Required Functionalities for Users**
+
 - [ ] **Register in PromptVault.**
-  Users can register by providing their details: name, surname, username,
-  email address, and password.
+      Users can register by providing their details: name, surname, username,
+      email address, and password.
 - [ ] **Login and logout of the system.**
-  Registered users can perform the login and should be able to log out after
-  performing the login.
+      Registered users can perform the login and should be able to log out after
+      performing the login.
 - [ ] **Create a prompt.**
-  After logging in, a user can create a prompt. Each prompt should include the
-  title, prompt text, category, and visibility status. The visibility status 
-  can be private or shared.
+      After logging in, a user can create a prompt. Each prompt should include the
+      title, prompt text, category, and visibility status. The visibility status
+      can be private or shared.
 - [ ] **View own prompts.**
-  After logging in, a user can view the list of prompts they created. A user
-  should only be able to view their own private prompts.
+      After logging in, a user can view the list of prompts they created. A user
+      should only be able to view their own private prompts.
 - [ ] **Edit and delete own prompts.**
-  After logging in, a user can edit and delete prompts they created. A user
-  should not be able to edit or delete prompts created by another user.
+      After logging in, a user can edit and delete prompts they created. A user
+      should not be able to edit or delete prompts created by another user.
 - [ ] **Browse shared prompts.**
-  A user can browse prompts marked as shared by other users. Private prompts
-  should not be visible to other users.
+      A user can browse prompts marked as shared by other users. Private prompts
+      should not be visible to other users.
 - [ ] **Submit a prompt to the simulated AI assistant.**
-  After logging in, a user can submit one of their prompts to the simulated AI
-  assistant. The application should display a simulated response. The
-  application does not need to contact any external AI service.
+      After logging in, a user can submit one of their prompts to the simulated AI
+      assistant. The application should display a simulated response. The
+      application does not need to contact any external AI service.
 - [ ] **View prompt submission history.**
-  After logging in, a user can view the history of prompts they submitted to 
-  the simulated AI assistant. The history should include the prompt title, 
-  submission date, and simulated AI response. A user should only be able to view
-  their own submission history.
+      After logging in, a user can view the history of prompts they submitted to
+      the simulated AI assistant. The history should include the prompt title,
+      submission date, and simulated AI response. A user should only be able to view
+      their own submission history.
 - [ ] **Receive a warning for sensitive prompts.**
-  If a submitted prompt contains one or more policy keywords, the application
-  should display a warning message to the user. The prompt should also be 
-  marked as flagged so that it can be reviewed by the admin.
-  For example, if a prompt contains the words “password” or “API key”, the 
-  application should warn the user that the prompt may contain sensitive 
-  information.
+      If a submitted prompt contains one or more policy keywords, the application
+      should display a warning message to the user. The prompt should also be
+      marked as flagged so that it can be reviewed by the admin.
+      For example, if a prompt contains the words “password” or “API key”, the
+      application should warn the user that the prompt may contain sensitive
+      information.
 
 ### Technical Requirements
-Your web app should be implemented using **Spring Boot** and the **Java** language. Unfortunately, you won’t have the flexibility to choose your favourite technology to implement the web app.
-Your web application requires a database to include users, login credentials, prompt categories, prompts, policy keywords, and prompt submission history. You should use MySQL as a database management system.
-There are no requirements concerning the graphical user interface of the web application. You can use Thymeleaf or React. The tutorial material will only provide an example of how to use Thymeleaf in your web application.
-The application does not need to use a real AI API. You can simulate the AI assistant using a simple predefined response generated by the application.
-Suggested Database Content
-Your database should include enough information to test the application. At minimum, it should include:
+
+Your web app should be implemented using **Spring Boot** and the **Java**
+language. Unfortunately, you won’t have the flexibility to choose your favourite
+technology to implement the web app. Your web application requires a database to
+include users, login credentials, prompt categories, prompts, policy keywords,
+and prompt submission history. You should use **MySQL** as a database management
+system.
+There are no requirements concerning the graphical user interface of the web
+application. You can use Thymeleaf or React. The tutorial material will only
+provide an example of how to use Thymeleaf in your web application. The
+application does not need to use a real AI API. You can simulate the AI
+assistant using a simple predefined response generated by the application.
+
+**Suggested Database Content**
+Your database should include enough information to test the application.
+
+At minimum, it should include:
+
 - one predefined admin account;
 - at least two registered users;
 - at least three prompt categories;
 - at least five prompts, including private and shared prompts;
 - at least five policy keywords.
+
 You may create this data manually, using SQL scripts, or through the application.
-Submission Requirements
-You should submit:
-the source code of your Spring Boot project;
-instructions explaining how to run your application;
-the database creation script or migration files;
 
+### Submission Requirements
 
-Working on Your Assignment
+**You should submit:**
+
+- the source code of your Spring Boot project;
+- instructions explaining how to run your application;
+- the database creation script or migration files;
+
+### Working on Your Assignment
+
 You are required to work on this assignment individually. You can use ChatGPT,
-but it is not required. You are not allowed to use any other Large Language
-Model different than ChatGPT.
+but it is not required. **You are not allowed to use any other Large Language
+Model different than ChatGPT.**
 
-If you decide to use ChatGPT, you MUST include the complete chat history in your
+If you decide to use ChatGPT, you **MUST** include the complete chat history in your
 submission. Please, remember to save the full chat history in a text document.
 You must also ask which version of GPT you are using before your interaction.
-Note: When ChatGPT exceeds the token limit, you will need to refresh the page
+**Note:** When ChatGPT exceeds the token limit, you will need to refresh the page
 and lose the previous chat history. In that situation, please remember to append
-the chat in your text document before refreshing the page.
+the chat in your text document before refreshing the page.\*\*
 
-Submitting Your Assignment
+### Submitting Your Assignment
+
 To submit your assignment, you need to provide:
 The implemented WebApp by providing a link to the distributed version repository
 (Git) or submitting the Zip version of your project. If you used ChatGPT, you
-will need to fill out a  questionnaire where you will need to provide a brief
+will need to fill out a [questionnaire](https://docs.google.com/forms/d/e/1FAIpQLSdvV0EJkMJHY0EV8oyEtqLbwhEMF9SvfDGteu9j8c7qy8n2pA/viewform?usp=sharing&ouid=104321067307543013979) where you will need to provide a brief
 description (max 400 words) of how you used ChatGPT and answer multiple-choice
 questions about ChatGPT usefulness. If you used ChatGPT, submit a text document
 including the complete chat history.
 
+### Evaluation Criteria
 
-
-Evaluation Criteria
 You will not be evaluated for how well you have secured your application. Also,
 you won’t be penalised for using ChatGPT. The only thing we will look at is the
 functionality of your application.
 
- 
-| |A|B|C|D|E|
-|-|-|-|-|-|-|
-|Functionality (75%)|Code runs in the web server  and performs correctly all the functionalities requested|Code runs in the web server and performs correctly most of the functionalities requested.|Code runs in the web server but only performs half of the functionalities requested|Code runs on the web server but only performs few of the functionalities requested|Code won’t run and the project page won’t display|
-|Persistency (20%)|Data persistence implemented correctly|Data persistence implemented correctly|Data persistence implemented correctly although entity classes could have improved.|Data persistence not implemented.|Data persistence not implemented.|
-|Look and Feel (5%)|Facilitates navigability of the application|The graphical interface is easy to use although in some parts navigation is not very intuitive|The graphical interface is not very easy to use and in many parts navigation is not intuitive|The graphical interface is implemented but it is hard to use .|No graphical interface|
-
-
+|                     | A                                                                                    | B                                                                                              | C                                                                                             | D                                                                                  | E                                                 |
+| ------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Functionality (75%) | Code runs in the web server and performs correctly all the functionalities requested | Code runs in the web server and performs correctly most of the functionalities requested.      | Code runs in the web server but only performs half of the functionalities requested           | Code runs on the web server but only performs few of the functionalities requested | Code won’t run and the project page won’t display |
+| Persistency (20%)   | Data persistence implemented correctly                                               | Data persistence implemented correctly                                                         | Data persistence implemented correctly although entity classes could have improved.           | Data persistence not implemented.                                                  | Data persistence not implemented.                 |
+| Look and Feel (5%)  | Facilitates navigability of the application                                          | The graphical interface is easy to use although in some parts navigation is not very intuitive | The graphical interface is not very easy to use and in many parts navigation is not intuitive | The graphical interface is implemented but it is hard to use .                     | No graphical interface                            |
