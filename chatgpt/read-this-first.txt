@@ -1,0 +1,3 @@
+i couldnt find a clean way to export the chatgpt chat log.
+
+I've copy pasted each message and tagger my inputs with $ME and the response with $GPT

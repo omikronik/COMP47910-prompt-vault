@@ -1,0 +1,625 @@
+$ME
+## Assignment 1 - Prompt Vault
+
+In this assignment, you will develop a simplified web application called
+**PromptVault** using **Spring Boot.** PromptVault is a secure prompt management
+system where users can create, store, organise, and submit prompts to a
+simulated AI assistant.
+The project focuses on implementing core features such as user registration,
+prompt management, simulated AI requests, and reviewing prompts that may contain
+sensitive information. The project, at this stage WILL NOT require you to
+consider the security aspects of the application, including authentication,
+access control, input validation, and protection of sensitive data.
+The application does not need to integrate with a real AI service. You can
+simulate the AI response by returning a predefined message such as:
+“This is a simulated AI response.”
+
+Alternatively, you can generate a simple response based on the submitted prompt.
+You are not required to use any external AI API.
+
+### Required Functionalities for Admin
+
+- [ ] **Log in and log out of the system.** You can assume that admins are already
+      registered with a predefined username and password. So, they will only need
+      to perform login and logout operations.
+- [ ] **Manage users.** After logging in, an admin can view the list of registered
+      users. Each user should include username, email address, role, and account
+      status. The admin should be able to enable or disable a user account.
+- [ ] **Manage prompt categories.**
+      After logging in, an admin can add, edit, and delete prompt categories. Each
+      category should include the category name and description. Examples of
+      categories include:
+  - Coding;
+  - Research;
+  - Cybersecurity;
+  - Legal;
+  - HR;
+  - Personal productivity.
+
+- [ ] **Manage policy keywords.**
+      After logging in, an admin can add, edit, and delete policy keywords. These
+      keywords will be used to identify prompts that may contain sensitive
+      information. Examples of policy keywords include: password; API key; secret;
+      credit card; private key; confidential; medical record; student number.
+
+- [ ] **View flagged prompts.**
+      After logging in, an admin can view prompts that have been flagged because
+      they contain one or more policy keywords. For each flagged prompt, the admin
+      should be able to see the prompt title, prompt owner, category, flagged
+      keyword, and date of submission.
+
+### **Required Functionalities for Users**
+
+- [ ] **Register in PromptVault.**
+      Users can register by providing their details: name, surname, username,
+      email address, and password.
+- [ ] **Login and logout of the system.**
+      Registered users can perform the login and should be able to log out after
+      performing the login.
+- [ ] **Create a prompt.**
+      After logging in, a user can create a prompt. Each prompt should include the
+      title, prompt text, category, and visibility status. The visibility status
+      can be private or shared.
+- [ ] **View own prompts.**
+      After logging in, a user can view the list of prompts they created. A user
+      should only be able to view their own private prompts.
+- [ ] **Edit and delete own prompts.**
+      After logging in, a user can edit and delete prompts they created. A user
+      should not be able to edit or delete prompts created by another user.
+- [ ] **Browse shared prompts.**
+      A user can browse prompts marked as shared by other users. Private prompts
+      should not be visible to other users.
+- [ ] **Submit a prompt to the simulated AI assistant.**
+      After logging in, a user can submit one of their prompts to the simulated AI
+      assistant. The application should display a simulated response. The
+      application does not need to contact any external AI service.
+- [ ] **View prompt submission history.**
+      After logging in, a user can view the history of prompts they submitted to
+      the simulated AI assistant. The history should include the prompt title,
+      submission date, and simulated AI response. A user should only be able to view
+      their own submission history.
+- [ ] **Receive a warning for sensitive prompts.**
+      If a submitted prompt contains one or more policy keywords, the application
+      should display a warning message to the user. The prompt should also be
+      marked as flagged so that it can be reviewed by the admin.
+      For example, if a prompt contains the words “password” or “API key”, the
+      application should warn the user that the prompt may contain sensitive
+      information.
+
+### Technical Requirements
+
+Your web app should be implemented using **Spring Boot** and the **Java**
+language. Unfortunately, you won’t have the flexibility to choose your favourite
+technology to implement the web app. Your web application requires a database to
+include users, login credentials, prompt categories, prompts, policy keywords,
+and prompt submission history. You should use **MySQL** as a database management
+system.
+There are no requirements concerning the graphical user interface of the web
+application. You can use Thymeleaf or React. The tutorial material will only
+provide an example of how to use Thymeleaf in your web application. The
+application does not need to use a real AI API. You can simulate the AI
+assistant using a simple predefined response generated by the application.
+
+**Suggested Database Content**
+Your database should include enough information to test the application.
+
+At minimum, it should include:
+
+- one predefined admin account;
+- at least two registered users;
+- at least three prompt categories;
+- at least five prompts, including private and shared prompts;
+- at least five policy keywords.
+
+You may create this data manually, using SQL scripts, or through the application.
+
+### Submission Requirements
+
+**You should submit:**
+
+- the source code of your Spring Boot project;
+- instructions explaining how to run your application;
+- the database creation script or migration files;
+
+### Working on Your Assignment
+
+You are required to work on this assignment individually. You can use ChatGPT,
+but it is not required. **You are not allowed to use any other Large Language
+Model different than ChatGPT.**
+
+If you decide to use ChatGPT, you **MUST** include the complete chat history in your
+submission. Please, remember to save the full chat history in a text document.
+You must also ask which version of GPT you are using before your interaction.
+**Note:** When ChatGPT exceeds the token limit, you will need to refresh the page
+and lose the previous chat history. In that situation, please remember to append
+the chat in your text document before refreshing the page.\*\*
+
+### Submitting Your Assignment
+
+To submit your assignment, you need to provide:
+The implemented WebApp by providing a link to the distributed version repository
+(Git) or submitting the Zip version of your project. If you used ChatGPT, you
+will need to fill out a [questionnaire](https://docs.google.com/forms/d/e/1FAIpQLSdvV0EJkMJHY0EV8oyEtqLbwhEMF9SvfDGteu9j8c7qy8n2pA/viewform?usp=sharing&ouid=104321067307543013979) where you will need to provide a brief
+description (max 400 words) of how you used ChatGPT and answer multiple-choice
+questions about ChatGPT usefulness. If you used ChatGPT, submit a text document
+including the complete chat history.
+
+### Evaluation Criteria
+
+You will not be evaluated for how well you have secured your application. Also,
+you won’t be penalised for using ChatGPT. The only thing we will look at is the
+functionality of your application.
+
+|                     | A                                                                                    | B                                                                                              | C                                                                                             | D                                                                                  | E                                                 |
+| ------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Functionality (75%) | Code runs in the web server and performs correctly all the functionalities requested | Code runs in the web server and performs correctly most of the functionalities requested.      | Code runs in the web server but only performs half of the functionalities requested           | Code runs on the web server but only performs few of the functionalities requested | Code won’t run and the project page won’t display |
+| Persistency (20%)   | Data persistence implemented correctly                                               | Data persistence implemented correctly                                                         | Data persistence implemented correctly although entity classes could have improved.           | Data persistence not implemented.                                                  | Data persistence not implemented.                 |
+| Look and Feel (5%)  | Facilitates navigability of the application                                          | The graphical interface is easy to use although in some parts navigation is not very intuitive | The graphical interface is not very easy to use and in many parts navigation is not intuitive | The graphical interface is implemented but it is hard to use .                     | No graphical interface                            |
+
+
+This is the project spec. I ONLY want guidance on how to bootstrap the project. Looking up online i can see that https://start.spring.io/ is the recommended way to create a spring boot project, what options and components would i need for this project?
+
+$GPT
+Yes, for a Spring Boot assignment like this, **Spring Initializr** ([Spring Initializr](https://start.spring.io?utm_source=chatgpt.com)) is exactly how I'd bootstrap it.
+
+Since this is your first Spring Boot project of this size, I'd recommend keeping the stack as simple as possible.
+
+## Spring Initializr Settings
+
+### Project
+
+* **Project:** Maven
+* **Language:** Java
+* **Spring Boot:** Latest stable version (3.x)
+* **Group:** `com.yasirceltik` (or your university/company style package)
+* **Artifact:** `promptvault`
+* **Name:** `PromptVault`
+* **Packaging:** Jar
+* **Java:** 21 (or whatever version your lecturer requires)
+
+---
+
+## Dependencies
+
+### Required
+
+#### Spring Web
+
+Used for:
+
+* Controllers
+* Routing
+* HTTP requests/responses
+
+```
+Spring Web
+```
+
+---
+
+#### Spring Data JPA
+
+Used for:
+
+* Entity classes
+* Repository interfaces
+* Database persistence
+
+```
+Spring Data JPA
+```
+
+---
+
+#### MySQL Driver
+
+Required because the assignment specifically requires MySQL.
+
+```
+MySQL Driver
+```
+
+---
+
+#### Thymeleaf
+
+I strongly recommend Thymeleaf for this assignment.
+
+Reasons:
+
+* Covered in course material
+* Simpler than building a React frontend
+* Easier to finish within assignment constraints
+* Less setup
+
+```
+Thymeleaf
+```
+
+---
+
+### Optional but Recommended
+
+#### Lombok
+
+Reduces boilerplate:
+
+```java
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+```
+
+instead of writing getters/setters manually.
+
+```
+Lombok
+```
+
+Not required, but nice.
+
+---
+
+#### Spring Boot DevTools
+
+Auto-reloads during development.
+
+```
+Spring Boot DevTools
+```
+
+Very useful.
+
+---
+
+## Dependencies Summary
+
+Your Initializr dependency list should look roughly like:
+
+* Spring Web
+* Spring Data JPA
+* MySQL Driver
+* Thymeleaf
+* Lombok (optional)
+* Spring Boot DevTools (optional)
+
+---
+
+# Suggested Project Structure
+
+```text
+src/main/java/com/yasirceltik/promptvault
+
+├── controller
+│   ├── AdminController
+│   ├── AuthController
+│   ├── PromptController
+│   └── UserController
+│
+├── service
+│   ├── UserService
+│   ├── PromptService
+│   ├── CategoryService
+│   ├── PolicyKeywordService
+│   └── SubmissionService
+│
+├── repository
+│   ├── UserRepository
+│   ├── PromptRepository
+│   ├── CategoryRepository
+│   ├── PolicyKeywordRepository
+│   └── SubmissionRepository
+│
+├── entity
+│   ├── User
+│   ├── Prompt
+│   ├── Category
+│   ├── PolicyKeyword
+│   └── PromptSubmission
+│
+└── PromptVaultApplication
+```
+
+---
+
+# Database Tables You'll Likely Need
+
+### User
+
+```java
+User
+```
+
+Fields:
+
+```text
+id
+name
+surname
+username
+email
+password
+role
+enabled
+```
+
+---
+
+### Category
+
+```java
+Category
+```
+
+Fields:
+
+```text
+id
+name
+description
+```
+
+Examples:
+
+* Coding
+* Research
+* Cybersecurity
+
+---
+
+### Prompt
+
+```java
+Prompt
+```
+
+Fields:
+
+```text
+id
+title
+promptText
+visibility
+flagged
+owner_id
+category_id
+```
+
+---
+
+### PolicyKeyword
+
+```java
+PolicyKeyword
+```
+
+Fields:
+
+```text
+id
+keyword
+```
+
+Examples:
+
+* password
+* api key
+* confidential
+
+---
+
+### PromptSubmission
+
+Tracks AI submissions.
+
+Fields:
+
+```text
+id
+prompt_id
+user_id
+submissionDate
+aiResponse
+```
+
+---
+
+### FlaggedPrompt
+
+You may not even need a separate table.
+
+A simple approach:
+
+```java
+Prompt.flagged = true
+Prompt.flaggedKeyword = "password"
+```
+
+Then admins can query:
+
+```java
+SELECT * FROM prompts
+WHERE flagged = true
+```
+
+---
+
+# Authentication
+
+The assignment explicitly says:
+
+> "At this stage WILL NOT require security"
+
+so **do not use Spring Security unless your lecturer specifically asks for it.**
+
+Simple session-based login is enough:
+
+```java
+@PostMapping("/login")
+```
+
+Check username/password manually.
+
+Store current user in:
+
+```java
+HttpSession
+```
+
+Example:
+
+```java
+session.setAttribute("user", user);
+```
+
+This is enough for the assignment.
+
+---
+
+# Suggested Development Order
+
+I'd implement features in this order:
+
+### Phase 1
+
+* Create project
+* Connect MySQL
+* Create entities
+* Create repositories
+
+### Phase 2
+
+* User registration
+* Login/logout
+
+### Phase 3
+
+* Categories CRUD
+
+### Phase 4
+
+* Prompt CRUD
+
+### Phase 5
+
+* Shared/private prompt browsing
+
+### Phase 6
+
+* Simulated AI submission
+
+```java
+return "This is a simulated AI response.";
+```
+
+### Phase 7
+
+* Policy keyword detection
+
+Example:
+
+```java
+for (PolicyKeyword keyword : keywords) {
+    if (promptText.toLowerCase()
+                  .contains(keyword.getKeyword().toLowerCase())) {
+
+        prompt.setFlagged(true);
+    }
+}
+```
+
+### Phase 8
+
+* Admin pages
+
+* User management
+
+* Category management
+
+* Keyword management
+
+* Flagged prompts
+
+### Phase 9
+
+* Seed database with required sample data
+
+---
+
+# application.properties Example
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/promptvault
+spring.datasource.username=root
+spring.datasource.password=password
+
+spring.jpa.hibernate.ddl-auto=update
+
+spring.jpa.show-sql=true
+
+spring.thymeleaf.cache=false
+```
+
+For an assignment of this scope, this setup is sufficient and keeps you focused on the functionality that is actually being graded rather than introducing complexity like React, JWTs, Spring Security, Docker, or external AI APIs.
+
+$ME
+dont give implementation details, i'm only looking for the spring boot setup, these are the version numbers available, what is the difference between 4.x.x vs 3.x.x for spring boot, any particular reason to go stable 3.x?
+
+4.1.0 (SNAPSHOT)4.1.0 (RC1)4.0.7 (SNAPSHOT)4.0.63.5.15 (SNAPSHOT)3.5.14
+
+$GPT
+
+If you're only concerned with **bootstrapping the project**, I'd recommend:
+
+* **Spring Boot 3.5.14** (latest stable release)
+* Avoid **SNAPSHOT** versions
+* Avoid **RC (Release Candidate)** versions for coursework unless your lecturer specifically wants bleeding-edge technology
+
+### What do these labels mean?
+
+| Version           | Meaning                                                                 |
+| ----------------- | ----------------------------------------------------------------------- |
+| 4.1.0 (SNAPSHOT)  | Development build of a future release. Changes frequently. Not stable.  |
+| 4.1.0 (RC1)       | Release Candidate. Nearly finished, but still undergoing final testing. |
+| 4.0.7 (SNAPSHOT)  | Development build. Not stable.                                          |
+| 4.0.6             | Stable Spring Boot 4 release.                                           |
+| 3.5.15 (SNAPSHOT) | Development build.                                                      |
+| 3.5.14            | Stable Spring Boot 3 release.                                           |
+
+### Why choose 3.5.14?
+
+For a university assignment, the main benefits are:
+
+1. **Most tutorials and examples you'll find online still target Boot 3.x**
+2. **Libraries are very well tested against Boot 3.x**
+3. **Less chance of encountering bugs or compatibility issues**
+4. **Your lecturer and demonstrator are more likely to be familiar with it**
+
+The grading criteria focus on functionality, not using the newest framework version.
+
+### What's different about Spring Boot 4?
+
+Spring Boot 4 is the next major generation. Major-version changes in Spring typically mean:
+
+* Removal of deprecated APIs
+* Changes to underlying framework versions
+* Potential library compatibility issues
+* Migration work from older applications
+
+For a brand-new project, Boot 4 is perfectly viable, but it provides very little benefit for a CRUD-style assignment like PromptVault.
+
+### My recommendation
+
+For this assignment:
+
+* **Spring Boot:** `3.5.14`
+* **Project:** Maven
+* **Java:** 21 (if available in your environment and accepted by your course)
+
+The only reason I'd pick **4.0.6** is if:
+
+* Your course specifically teaches Spring Boot 4, or
+* Your lecturer explicitly says to use the latest major version.
+
+Otherwise, 3.5.14 is the safer choice and will make it easier to follow documentation, tutorials, and examples.
