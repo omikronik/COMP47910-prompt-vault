@@ -2,8 +2,9 @@
 
 ## Entities
 
+user table, role controls perms for now
+
 ```
-// user table, role controls perms for now
 - user
   - id: id
   - email: string
@@ -16,8 +17,12 @@
   - updatedOn: timestamp
   - updatedBy: userId
 
-// categories for prompts
-// only admins create/modify these
+```
+
+categories for prompts
+only admins create/modify these
+
+```
 - PromptCategory
   - id: string
   - name: string
@@ -27,8 +32,12 @@
   - updatedOn: timestamp
   - updatedBy: userId
 
-// keywords to flag prompts with
-// only admins create/modify these
+```
+
+keywords to flag prompts with
+only admins create/modify these
+
+```
 - PolicyKeywords
   - id: string
   - content: string
@@ -36,17 +45,22 @@
   - createdBy: userId
   - updatedOn: timestamp
   - updatedBy: userId
+```
 
+when a prompt is created and theres
+a match to a policy keyword
 
-// when a prompt is created and theres
-// a match to a policy keyword
+```
 - PromptPolicyMatch
   - id
   - promptId: id
   - policyKeywordId: id
   - createdOn: timestamp
+```
 
-// check against PolicyKeywords on create/update
+check against PolicyKeywords on create/update
+
+```
 - Prompt
   - id: id
   - title: string
@@ -60,8 +74,12 @@
   - updatedOn: timestamp
   - updatedBy: userId
 
-// a chat thread when the user hits "use prompt"
-// or something
+```
+
+a chat thread when the user hits "use prompt"
+or something
+
+```
 - Conversation
   - id
   - promptId: id // the prompt that was used
@@ -71,6 +89,9 @@
                          // use for sorting by recent
   - policyFlagged: boolean // mark whole chat if there is a flag
 
+```
+
+```
 - ConversationMessage
   - id
   - conversationId: id
@@ -79,9 +100,13 @@
   - policyFlagged: boolean
   - createdOn
 
-// When a chat message is sent and there
-// is a policy keyword match
-// same as the PromptPolicyMatch basically
+```
+
+When a chat message is sent and there
+is a policy keyword match
+same as the PromptPolicyMatch basically
+
+```
 - MessagePolicyMatch
   - id
   - promptId: id
