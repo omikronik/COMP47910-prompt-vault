@@ -7,40 +7,34 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "user")
-public class User {
+@Table(name = "conversation")
+public class Conversation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@Column(nullable = false, unique = true, length = 255)
-	private String email;
+	@Column(nullable = false, length = 255)
+	private String title;
 
-	@Column(nullable = false)
-	private String password;
+	@ManyToOne
+	@JoinColumn(name = "prompt_id")
+	private Prompt promptId;
 
-	@Column(nullable = false, length = 50)
-	private String role;
+	@ManyToOne
+	@JoinColumn(name = "owner")
+	private User owner;
 
-	@Column(nullable = false)
-	private Boolean isActive;
-
-	@Column(nullable = false)
-	private int loginAttempts = 0;
+	private Boolean policyFlagged;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdOn;
 
 	@ManyToOne
-	@JoinColumn(name = "created_by", nullable = false)
+	@JoinColumn(name = "created_by")
 	private User createdBy;
 
 	@UpdateTimestamp
 	@Column(nullable = false)
 	private LocalDateTime updatedOn;
-
-	@ManyToOne
-	@JoinColumn(name = "updated_by", nullable = false)
-	private User updatedBy;
 }

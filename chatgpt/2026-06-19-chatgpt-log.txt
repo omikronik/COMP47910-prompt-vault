@@ -1,0 +1,959 @@
+$ME
+### Spring Boot Setup Recommendations for PromptVault
+
+#### Spring Initializr
+
+Use:
+
+* **Project:** Maven
+* **Language:** Java
+* **Spring Boot:** **3.5.14** (stable)
+* **Packaging:** Jar
+* **Java:** 21 (or whatever version your course/environment supports)
+
+#### Dependencies
+
+Required:
+
+* Spring Web
+* Spring Data JPA
+* MySQL Driver
+* Thymeleaf
+
+Recommended:
+
+* Spring Boot DevTools (hot reload)
+* Lombok (optional, reduces boilerplate)
+
+---
+
+### Why Spring Boot 3.5.14 Instead of 4.x?
+
+Available versions:
+
+* 4.1.0 (SNAPSHOT) → development build
+* 4.1.0 (RC1) → release candidate
+* 4.0.7 (SNAPSHOT) → development build
+* 4.0.6 → stable
+* 3.5.15 (SNAPSHOT) → development build
+* **3.5.14 → stable**
+
+Recommendation: **3.5.14**
+
+Reasons:
+
+* Most tutorials/examples currently target Boot 3.x.
+* More mature ecosystem and library compatibility.
+* Less risk of unexpected issues.
+* Easier to get support from lecturers/TAs.
+
+Boot 4 is fine for new projects, but provides little benefit for a CRUD-style university assignment.
+
+---
+
+### Running the Application
+
+Using Maven Wrapper:
+
+Linux/macOS:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Windows:
+
+```cmd
+mvnw.cmd spring-boot:run
+```
+
+Default URL:
+
+```text
+http://localhost:8080
+```
+
+You can also run the main Spring Boot application class directly from your IDE.
+
+---
+
+### Hot Reload During Development
+
+Add:
+
+* Spring Boot DevTools
+
+Workflow:
+
+1. Start app with `spring-boot:run`
+2. Leave it running
+3. Save Java files → application automatically restarts
+4. Save Thymeleaf templates → changes usually appear immediately
+
+---
+
+### Running Tests
+
+Run all tests:
+
+```bash
+./mvnw test
+```
+
+Run a specific test:
+
+```bash
+./mvnw -Dtest=UserServiceTest test
+```
+
+Most IDEs (IntelliJ, VS Code, Eclipse) can also run tests directly.
+
+---
+
+### Java Testing Structure vs C#
+
+In C#:
+
+```text
+PromptVault/
+PromptVault.Tests/
+```
+
+is common.
+
+In a typical Spring Boot/Maven project, tests live inside the same project:
+
+```text
+src/
+├── main/
+│   └── java/
+│       └── com/example/promptvault
+│
+└── test/
+    └── java/
+        └── com/example/promptvault
+```
+
+Example:
+
+Production code:
+
+```text
+src/main/java/com/example/promptvault/service/UserService.java
+```
+
+Test:
+
+```text
+src/test/java/com/example/promptvault/service/UserServiceTest.java
+```
+
+The package structure mirrors the production code.
+
+---
+
+### Multi-Project Equivalent
+
+A separate test project is possible with a multi-module Maven setup:
+
+```text
+promptvault-parent/
+├── promptvault-app/
+├── promptvault-tests/
+└── pom.xml
+```
+
+But this is uncommon for a university CRUD application and generally unnecessary.
+
+---
+
+### Testing Dependencies
+
+Spring Initializr automatically adds:
+
+```text
+spring-boot-starter-test
+```
+
+which includes:
+
+* JUnit 5
+* Mockito
+* AssertJ
+* Spring Test
+
+So tests can be written immediately under:
+
+```text
+src/test/java
+```
+
+without additional setup.
+
+---
+
+### Maven vs Gradle
+
+Recommendation: **Maven**
+
+Reasons:
+
+* Most Spring tutorials use Maven.
+* Simpler for beginners.
+* Spring Initializr defaults to it.
+* More likely to match course examples and TA expectations.
+---
+this is the summary of a previous chat. Essentially I want a dockerfile to run mysql easily on my two computers. One thing I want to make sure is, as i dont know the convention in Sqring Boot, is my database tables defined in java or do i need to have my create tables in sql. I have used .Net with EF Core where you define your tables in .net, so how do i set up my dockerfile and project so that when I run it it'll create and seed my db ready for use. This is for an assignment so it does not matter if we are clearing the db each time 
+
+$GPT
+If you're coming from EF Core, the closest equivalent in Spring Boot is **JPA/Hibernate**.
+
+For a university CRUD application, I'd recommend:
+
+1. Define your tables as Java entities.
+2. Let Hibernate create the schema automatically.
+3. Seed the database using SQL scripts or a startup component.
+4. Run MySQL in Docker.
+
+That gives you a workflow very similar to EF Core's "Code First" approach.
+
+---
+
+## 1. Define Tables in Java
+
+For example, if PromptVault has users:
+
+```java
+package com.example.promptvault.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String username;
+
+    private String email;
+
+    // getters/setters
+}
+```
+
+Hibernate can generate:
+
+```sql
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255),
+    email VARCHAR(255)
+);
+```
+
+from that class.
+
+No manual `CREATE TABLE` needed.
+
+---
+
+## 2. Configure Hibernate Auto-Creation
+
+In `application.properties`:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/promptvault
+spring.datasource.username=promptvault
+spring.datasource.password=password
+
+spring.jpa.hibernate.ddl-auto=create
+spring.jpa.show-sql=true
+```
+
+Important values:
+
+| Value         | Behaviour                           |
+| ------------- | ----------------------------------- |
+| `none`        | Do nothing                          |
+| `validate`    | Check schema matches entities       |
+| `update`      | Modify existing schema              |
+| `create`      | Drop and recreate schema on startup |
+| `create-drop` | Create on startup, drop on shutdown |
+
+For your assignment:
+
+```properties
+spring.jpa.hibernate.ddl-auto=create
+```
+
+is probably perfect.
+
+Every run starts with a clean database.
+
+---
+
+## 3. Seed Data Automatically
+
+Spring Boot automatically executes:
+
+```text
+src/main/resources/data.sql
+```
+
+after schema creation.
+
+Example:
+
+```sql
+INSERT INTO users(username, email)
+VALUES
+('yasir', 'yasir@example.com'),
+('admin', 'admin@example.com');
+```
+
+Every time you start the application:
+
+1. Tables are recreated.
+2. Data is inserted.
+
+That's often enough for an assignment.
+
+---
+
+## 4. Docker MySQL Setup
+
+Create:
+
+```text
+docker-compose.yml
+```
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.4
+
+    container_name: promptvault-mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: promptvault
+      MYSQL_USER: promptvault
+      MYSQL_PASSWORD: password
+
+    ports:
+      - "3306:3306"
+```
+
+Start:
+
+```bash
+docker compose up -d
+```
+
+Stop:
+
+```bash
+docker compose down
+```
+
+Check logs:
+
+```bash
+docker compose logs -f
+```
+
+---
+
+## 5. Connect Spring Boot to Docker MySQL
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/promptvault
+spring.datasource.username=promptvault
+spring.datasource.password=password
+
+spring.jpa.hibernate.ddl-auto=create
+```
+
+Then:
+
+```bash
+docker compose up -d
+./mvnw spring-boot:run
+```
+
+The application will:
+
+1. Connect to MySQL.
+2. Create tables from entities.
+3. Run `data.sql`.
+4. Be ready immediately.
+
+---
+
+## 6. Typical Assignment Structure
+
+```text
+src/main/java/com/example/promptvault
+
+├── controller
+│   └── UserController.java
+
+├── service
+│   └── UserService.java
+
+├── repository
+│   └── UserRepository.java
+
+├── model
+│   └── User.java
+
+└── PromptVaultApplication.java
+```
+
+Repository example:
+
+```java
+package com.example.promptvault.repository;
+
+import com.example.promptvault.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository
+    extends JpaRepository<User, Long> {
+}
+```
+
+No implementation required—Spring generates it automatically.
+
+---
+
+## 7. Even Easier: Start Everything With One Command
+
+You can also Dockerize Spring Boot itself:
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: promptvault
+      MYSQL_USER: promptvault
+      MYSQL_PASSWORD: password
+
+  app:
+    build: .
+    depends_on:
+      - mysql
+```
+
+Then:
+
+```bash
+docker compose up
+```
+
+starts both the database and application.
+
+For a university assignment, though, I would keep it simple:
+
+* MySQL in Docker
+* Spring Boot run from IntelliJ/VS Code
+* `ddl-auto=create`
+* `data.sql` for seed data
+
+That gives you an EF Core-style code-first workflow with almost no database maintenance. Later, if you want something closer to EF Core migrations, Spring's equivalent is **Flyway** or **Liquibase**, but for an assignment I would avoid them unless specifically required.
+
+$ME
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+GenerationType.Identity vs GenerationType.UUID
+
+$GPT
+The main difference is **who generates the primary key** and **what type of key you get**.
+
+## `GenerationType.IDENTITY`
+
+```java
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+```
+
+Produces IDs like:
+
+```text
+1
+2
+3
+4
+5
+```
+
+The database generates the value using MySQL's `AUTO_INCREMENT`.
+
+Generated table:
+
+```sql
+id BIGINT AUTO_INCREMENT PRIMARY KEY
+```
+
+### Pros
+
+* Simple and familiar.
+* Easy to read and debug.
+* Smaller indexes.
+* Works well for university CRUD applications.
+
+### Cons
+
+* IDs are predictable.
+* Doesn't work as well when data is created across multiple databases/services.
+
+---
+
+## `GenerationType.UUID`
+
+```java
+@Id
+@GeneratedValue(strategy = GenerationType.UUID)
+private UUID id;
+```
+
+Produces IDs like:
+
+```text
+550e8400-e29b-41d4-a716-446655440000
+```
+
+Generated column typically becomes:
+
+```sql
+id BINARY(16)
+```
+
+or
+
+```sql
+id CHAR(36)
+```
+
+depending on configuration and dialect.
+
+### Pros
+
+* Globally unique.
+* Can be generated by the application before inserting into the database.
+* Useful in distributed systems and microservices.
+* Harder to guess URLs:
+
+```text
+/prompts/550e8400-e29b-41d4-a716-446655440000
+```
+
+vs
+
+```text
+/prompts/123
+```
+
+### Cons
+
+* Larger indexes.
+* Harder to read manually.
+* More storage overhead.
+
+---
+
+## For PromptVault
+
+I'd use:
+
+```java
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+```
+
+Reasons:
+
+* Simpler.
+* Most Spring tutorials use it.
+* Easier to write queries and debug.
+* Smaller database footprint.
+* Matches what lecturers and TAs are most likely expecting.
+
+A typical Prompt entity:
+
+```java
+@Entity
+public class Prompt {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+
+    @Column(length = 5000)
+    private String content;
+}
+```
+
+would generate rows like:
+
+| id | title             |
+| -- | ----------------- |
+| 1  | Java Refactor     |
+| 2  | SQL Generator     |
+| 3  | Unit Test Creator |
+
+which is perfectly adequate for a CRUD assignment.
+
+My rule of thumb:
+
+* University projects, internal tools, standard web apps → `IDENTITY`
+* Public APIs, microservices, distributed systems → `UUID` often makes sense.
+
+$ME
+- user
+  - id: id
+  - email: string
+  - password: string
+  - role: string
+  - isActive: true
+  - loginAttempts: number
+  - createdOn: timestamp
+  - createdBy: userId | null // null or systemUser for manual creation
+  - updatedOn: timestamp
+  - updatedBy: userId
+
+how would this look as a java class definition for a table?
+
+$GPT
+For a straightforward Spring Boot/JPA implementation, I'd model it something like this:
+
+```java
+package com.example.promptvault.model;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 255)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false, length = 50)
+    private String role;
+
+    @Column(nullable = false)
+    private boolean isActive = true;
+
+    @Column(nullable = false)
+    private int loginAttempts = 0;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdOn;
+
+    private Long createdBy;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedOn;
+
+    private Long updatedBy;
+
+    // Constructors
+
+    public User() {
+    }
+
+    // Getters and setters omitted for brevity
+}
+```
+
+This would generate a table roughly equivalent to:
+
+```sql
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    is_active BOOLEAN NOT NULL,
+    login_attempts INT NOT NULL,
+    created_on DATETIME NOT NULL,
+    created_by BIGINT,
+    updated_on DATETIME NOT NULL,
+    updated_by BIGINT
+);
+```
+
+## Option 1: Store User IDs Directly (Simplest)
+
+Your original design implies:
+
+```java
+private Long createdBy;
+private Long updatedBy;
+```
+
+This is the easiest approach for an assignment.
+
+Pros:
+
+* Simple
+* No complex JPA relationships
+* Easy to seed data
+
+Cons:
+
+* No foreign key enforcement
+
+---
+
+## Option 2: Use Actual Relationships (More "Spring/JPA")
+
+Instead of:
+
+```java
+private Long createdBy;
+```
+
+you can do:
+
+```java
+@ManyToOne
+@JoinColumn(name = "created_by")
+private User createdBy;
+```
+
+and
+
+```java
+@ManyToOne
+@JoinColumn(name = "updated_by")
+private User updatedBy;
+```
+
+Now JPA understands the relationship:
+
+```text
+User
+ ├─ createdBy -> User
+ └─ updatedBy -> User
+```
+
+Generated schema:
+
+```sql
+created_by BIGINT,
+updated_by BIGINT,
+
+FOREIGN KEY (created_by) REFERENCES users(id),
+FOREIGN KEY (updated_by) REFERENCES users(id)
+```
+
+For a university project I'd probably use relationships because they're good JPA practice and demonstrate understanding of ORM concepts.
+
+## Automatic Timestamps
+
+Instead of manually setting timestamps every time, Spring/Hibernate can do it automatically:
+
+```java
+@CreationTimestamp
+@Column(nullable = false, updatable = false)
+private LocalDateTime createdOn;
+
+@UpdateTimestamp
+@Column(nullable = false)
+private LocalDateTime updatedOn;
+```
+
+Then you don't need to populate them yourself.
+
+## Role as an Enum
+
+Instead of:
+
+```java
+private String role;
+```
+
+you could define:
+
+```java
+public enum Role {
+    ADMIN,
+    USER
+}
+```
+
+and use:
+
+```java
+@Enumerated(EnumType.STRING)
+@Column(nullable = false)
+private Role role;
+```
+
+This prevents typos like:
+
+```text
+"Admin"
+"admin"
+"ADMIN"
+```
+
+and stores:
+
+```sql
+ADMIN
+USER
+```
+
+in the database.
+
+For an assignment, my final version would be:
+
+```java
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@Column(nullable = false, unique = true)
+private String email;
+
+@Column(nullable = false)
+private String password;
+
+@Enumerated(EnumType.STRING)
+private Role role;
+
+private boolean isActive = true;
+
+private int loginAttempts = 0;
+
+@CreationTimestamp
+private LocalDateTime createdOn;
+
+@ManyToOne
+@JoinColumn(name = "created_by")
+private User createdBy;
+
+@UpdateTimestamp
+private LocalDateTime updatedOn;
+
+@ManyToOne
+@JoinColumn(name = "updated_by")
+private User updatedBy;
+```
+
+It stays close to your schema while taking advantage of JPA's relationship and auditing features.
+
+$ME
+i get lsp errors for the join columns
+
+   │   ├╴E The attribute value is undefined for the annotation type JoinColumn Java (67109475) [37, 14]
+   │   └╴E The attribute value is undefined for the annotation type JoinColumn Java (67109475) [45, 14]
+
+$GPT
+That error usually means you're using the wrong `@JoinColumn` import.
+
+Make sure you have:
+
+```java
+import jakarta.persistence.JoinColumn;
+```
+
+and **not** something else.
+
+For Spring Boot 3.x, your imports should look like:
+
+```java
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+```
+
+Then this is valid:
+
+```java
+@ManyToOne
+@JoinColumn(name = "created_by")
+private User createdBy;
+
+@ManyToOne
+@JoinColumn(name = "updated_by")
+private User updatedBy;
+```
+
+---
+
+If the error specifically says:
+
+```text
+The attribute value is undefined for the annotation type JoinColumn
+```
+
+then your IDE is probably seeing a different `JoinColumn` annotation, because the JPA one definitely supports `name`.
+
+Check what import VS Code/IntelliJ added. You may have accidentally imported something like:
+
+```java
+import javax.management.relation.Role;
+```
+
+or another non-JPA annotation.
+
+---
+
+A quick test:
+
+Ctrl+Click (or Go To Definition) on `JoinColumn`.
+
+You should land in something similar to:
+
+```java
+package jakarta.persistence;
+
+public @interface JoinColumn {
+    String name() default "";
+    ...
+}
+```
+
+If you land anywhere else, that's the problem.
+
+---
+
+Also, if you're using Spring Boot 3.5.x, make sure your dependency is:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+```
+
+Without JPA on the classpath, IDEs sometimes get confused about annotations.
+
+Can you paste the imports at the top of the entity class? The incorrect import will usually jump out immediately.

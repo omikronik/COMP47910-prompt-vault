@@ -82,9 +82,11 @@ or something
 ```
 - Conversation
   - id
+  - title: string // need to identify visually
   - promptId: id // the prompt that was used
   - owner: id
   - createdOn: timestamp
+  - createdBy: userId
   - updatedOn: timestamp // new message is an update i suppose?
                          // use for sorting by recent
   - policyFlagged: boolean // mark whole chat if there is a flag
@@ -109,7 +111,7 @@ same as the PromptPolicyMatch basically
 ```
 - MessagePolicyMatch
   - id
-  - promptId: id
+  - conversationMessageId: id
   - policyKeywordId: id
   - createdOn: timestamp
 
