@@ -3,12 +3,22 @@ package com.yasirceltik.promptvault.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "policy_keyword")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class PolicyKeyword {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

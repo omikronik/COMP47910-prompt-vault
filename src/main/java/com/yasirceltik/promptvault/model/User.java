@@ -1,6 +1,12 @@
 package com.yasirceltik.promptvault.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,6 +14,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "user")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,12 +2,22 @@ package com.yasirceltik.promptvault.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "conversation")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Conversation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
