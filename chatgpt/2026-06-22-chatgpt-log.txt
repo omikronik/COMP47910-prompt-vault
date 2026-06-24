@@ -1,0 +1,478 @@
+$ME
+how do i start a maven cli app
+
+$GPT
+To start a basic Java CLI app with Apache Maven, you usually:
+
+1. Generate a Maven project
+2. Add a `main` method
+3. Build and run it
+
+## 1. Generate a Maven project
+
+If Maven is installed:
+
+```bash
+mvn archetype:generate \
+  -DgroupId=com.example \
+  -DartifactId=my-cli-app \
+  -DarchetypeArtifactId=maven-archetype-quickstart \
+  -DinteractiveMode=false
+```
+
+This creates:
+
+```text
+my-cli-app/
+├── pom.xml
+└── src/
+    ├── main/java/com/example/App.java
+    └── test/java/com/example/AppTest.java
+```
+
+Move into it:
+
+```bash
+cd my-cli-app
+```
+
+---
+
+## 2. Edit the main class
+
+Open:
+
+```text
+src/main/java/com/example/App.java
+```
+
+Replace it with:
+
+```java
+package com.example;
+
+public class App {
+    public static void main(String[] args) {
+        System.out.println("Hello from Maven CLI app!");
+
+        for (String arg : args) {
+            System.out.println("Arg: " + arg);
+        }
+    }
+}
+```
+
+---
+
+## 3. Build the app
+
+```bash
+mvn package
+```
+
+This produces:
+
+```text
+target/my-cli-app-1.0-SNAPSHOT.jar
+```
+
+---
+
+## 4. Run it
+
+```bash
+java -cp target/my-cli-app-1.0-SNAPSHOT.jar com.example.App hello world
+```
+
+Output:
+
+```text
+Hello from Maven CLI app!
+Arg: hello
+Arg: world
+```
+
+---
+
+## Optional: make the JAR executable
+
+Add this inside `<build>` in `pom.xml`:
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.4.2</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <mainClass>com.example.App</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+Then rebuild:
+
+```bash
+mvn package
+```
+
+Now you can run:
+
+```bash
+java -jar target/my-cli-app-1.0-SNAPSHOT.jar
+```
+
+---
+
+Useful links:
+
+* [Apache Maven Official Site](https://maven.apache.org?utm_source=chatgpt.com)
+* [Maven Getting Started Guide](https://maven.apache.org/guides/getting-started/index.html?utm_source=chatgpt.com)
+
+$ME
+how do i add maven to nix using nix-shell -p
+
+$GPT
+You can temporarily enter a shell with Apache Maven using:
+
+```bash
+nix-shell -p maven
+```
+
+That gives you Maven plus a compatible JDK.
+
+Check it:
+
+```bash
+mvn -v
+```
+
+---
+
+If you also want a specific Java version:
+
+```bash
+nix-shell -p maven jdk17
+```
+
+or:
+
+```bash
+nix-shell -p maven jdk21
+```
+
+---
+
+For a reusable project shell, create `shell.nix`:
+
+```nix
+with import <nixpkgs> {};
+
+mkShell {
+  buildInputs = [
+    maven
+    jdk21
+  ];
+}
+```
+
+Then enter it with:
+
+```bash
+nix-shell
+```
+
+---
+
+If you're using flakes, use `nix develop` instead:
+
+```nix
+{
+  description = "Maven CLI app";
+
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+  outputs = { self, nixpkgs }:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs { inherit system; };
+    in {
+      devShells.${system}.default = pkgs.mkShell {
+        buildInputs = [
+          pkgs.maven
+          pkgs.jdk21
+        ];
+      };
+    };
+}
+```
+
+Then:
+
+```bash
+nix develop
+```
+
+Useful docs:
+
+* [NixOS Search (packages)](https://search.nixos.org/packages?utm_source=chatgpt.com)
+* [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/?utm_source=chatgpt.com)
+
+$ME
+can i make it so that i can run this with a single line for easier debugging
+
+$GPT
+Yes. The easiest way is to use the Apache Maven exec plugin so you can run:
+
+```bash id="hifw7h"
+mvn exec:java
+```
+
+or with args:
+
+```bash id="d5fygv"
+mvn exec:java -Dexec.args="hello world"
+```
+
+Add this to your `pom.xml`:
+
+```xml id="n1ls6n"
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.5.0</version>
+            <configuration>
+                <mainClass>com.example.App</mainClass>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+Then just:
+
+```bash id="zly3jg"
+mvn compile exec:java
+```
+
+That compiles and runs in one command.
+
+---
+
+For debugging with the JVM debugger:
+
+```bash id="sqv1kk"
+mvn exec:java \
+  -Dexec.jvmArgs="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005"
+```
+
+Then attach your IDE to port `5005`.
+
+---
+
+You can also make a tiny shell alias in your `shell.nix`:
+
+```nix id="q4st9w"
+shellHook = ''
+  alias run="mvn compile exec:java"
+'';
+```
+
+Then inside the nix shell:
+
+```bash id="9xq7jr"
+run
+```
+
+or:
+
+```bash id="x2t6b7"
+run -Dexec.args="test"
+```
+
+$ME
+ ❯ mvn exec:java
+[INFO] Scanning for projects...
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/exec
+-maven-plugin/maven-metadata.xml
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/exec-
+maven-plugin/maven-metadata.xml (1.1 kB at 8.1 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/exec
+-maven-plugin/3.6.3/exec-maven-plugin-3.6.3.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/exec-
+maven-plugin/3.6.3/exec-maven-plugin-3.6.3.pom (16 kB at 781 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/mojo
+-parent/94/mojo-parent-94.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/mojo-
+parent/94/mojo-parent-94.pom (38 kB at 2.1 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.
+14.0/junit-bom-5.14.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.1
+4.0/junit-bom-5.14.0.pom (5.7 kB at 354 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/exec
+-maven-plugin/3.6.3/exec-maven-plugin-3.6.3.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/exec-
+maven-plugin/3.6.3/exec-maven-plugin-3.6.3.jar (95 kB at 4.0 MB/s)
+[INFO] 
+[INFO] ---------------------< com.example:console-login >----------------------
+[INFO] Building console-login 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.6.3:java (default-cli) @ console-login ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resol
+ver/maven-resolver-util/1.9.24/maven-resolver-util-1.9.24.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolv
+er/maven-resolver-util/1.9.24/maven-resolver-util-1.9.24.pom (2.2 kB at 101 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resol
+ver/maven-resolver/1.9.24/maven-resolver-1.9.24.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolv
+er/maven-resolver/1.9.24/maven-resolver-1.9.24.pom (25 kB at 1.2 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resol
+ver/maven-resolver-api/1.9.24/maven-resolver-api-1.9.24.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolv
+er/maven-resolver-api/1.9.24/maven-resolver-api-1.9.24.pom (2.2 kB at 139 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/com
+mons-exec/1.6.0/commons-exec-1.6.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/comm
+ons-exec/1.6.0/commons-exec-1.6.0.pom (11 kB at 586 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/com
+mons-parent/93/commons-parent-93.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/comm
+ons-parent/93/commons-parent-93.pom (79 kB at 3.8 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.
+14.1/junit-bom-5.14.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.1
+4.1/junit-bom-5.14.1.pom (5.7 kB at 333 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/
+asm-9.9.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/a
+sm-9.9.1.pom (2.4 kB at 148 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-common
+s/9.9.1/asm-commons-9.9.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons
+/9.9.1/asm-commons-9.9.1.pom (2.8 kB at 164 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9
+.9.1/asm-tree-9.9.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.
+9.1/asm-tree-9.9.1.pom (2.6 kB at 144 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resol
+ver/maven-resolver-util/1.9.24/maven-resolver-util-1.9.24.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/resol
+ver/maven-resolver-api/1.9.24/maven-resolver-api-1.9.24.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/com
+mons-exec/1.6.0/commons-exec-1.6.0.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/
+asm-9.9.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-common
+s/9.9.1/asm-commons-9.9.1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolv
+er/maven-resolver-util/1.9.24/maven-resolver-util-1.9.24.jar (196 kB at 7.3 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9
+.9.1/asm-tree-9.9.1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.
+9.1/asm-tree-9.9.1.jar (52 kB at 1.3 MB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/comm
+ons-exec/1.6.0/commons-exec-1.6.0.jar (69 kB at 1.5 MB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons
+/9.9.1/asm-commons-9.9.1.jar (75 kB at 1.5 MB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/resolv
+er/maven-resolver-api/1.9.24/maven-resolver-api-1.9.24.jar (157 kB at 3.1 MB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/a
+sm-9.9.1.jar (126 kB at 2.2 MB/s)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.680 s
+[INFO] Finished at: 2026-05-22T12:32:45+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.6.3:java (defaul
+t-cli) on project console-login: The parameters 'mainClass' for goal org.codehaus.moj
+o:exec-maven-plugin:3.6.3:java are missing or invalid -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the
+ following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginParameterExce
+ption
+
+$GPT
+You haven't told Apache Maven which class contains `main()` yet.
+
+Add this to your `pom.xml`:
+
+```xml id="5b7xqg"
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.6.3</version>
+            <configuration>
+                <mainClass>com.example.App</mainClass>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+Replace `com.example.App` with your actual package/class name.
+
+For example, if your file is:
+
+```text id="o4q35m"
+src/main/java/com/example/App.java
+```
+
+and contains:
+
+```java id="a9ek3f"
+package com.example;
+
+public class App {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+    }
+}
+```
+
+then `com.example.App` is correct.
+
+After that:
+
+```bash id="3b3tv9"
+mvn compile exec:java
+```
+
+---
+
+You can also skip editing `pom.xml` entirely and do:
+
+```bash id="vmpv0k"
+mvn exec:java -Dexec.mainClass="com.example.App"
+```
+
+That’s often nicer while prototyping/debugging.
+
+$ME
+this is the start point main.java
+
+I am working on a sample app with these requireemnts:
+- console based
+- store user and password in a hashmap
+- when its run, present a menu where hitting a number enters that, i.e. 1) register \n 2) login,
+- hitting 1 goes to a clear rTerminal and input for new user name, then enter for password, then thats is
+- hitting 2 prompts for username then password
+
+this is purely an example app

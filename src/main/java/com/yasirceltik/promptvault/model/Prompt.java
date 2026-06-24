@@ -33,7 +33,9 @@ public class Prompt {
 	@JoinColumn(name = "owner")
 	private User owner;
 
-	private String visibility;
+	@Enumerated(EnumType.STRING)
+	@Builder.Default
+	private PromptVisibility visibility = PromptVisibility.VISIBLE;
 
 	private Boolean policyFlagged;
 

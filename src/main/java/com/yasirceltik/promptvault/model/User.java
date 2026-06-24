@@ -30,13 +30,14 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 
-	@Column(nullable = false, length = 50)
-	private String role;
+	@Enumerated(EnumType.STRING)
+	private UserRole role;
 
 	@Column(nullable = false)
 	private Boolean isActive;
 
 	@Column(nullable = false)
+	@Builder.Default
 	private int loginAttempts = 0;
 
 	@CreationTimestamp
@@ -44,7 +45,7 @@ public class User {
 	private LocalDateTime createdOn;
 
 	@ManyToOne
-	@JoinColumn(name = "created_by", nullable = false)
+	@JoinColumn(name = "created_by", nullable = true)
 	private User createdBy;
 
 	@UpdateTimestamp
@@ -52,6 +53,6 @@ public class User {
 	private LocalDateTime updatedOn;
 
 	@ManyToOne
-	@JoinColumn(name = "updated_by", nullable = false)
+	@JoinColumn(name = "updated_by", nullable = true)
 	private User updatedBy;
 }

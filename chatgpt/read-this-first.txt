@@ -1,3 +1,6 @@
-i couldnt find a clean way to export the chatgpt chat log.
+i couldnt find a clean way to export the chatgpt chat logs.
 
 I've copy pasted each message and tagger my inputs with $ME and the response with $GPT
+
+here is the chatgpt project link in case the source is better
+https://chatgpt.com/g/g-p-6a3ad2c2729c81919b0d12ee8cce0655-promptvault/project
