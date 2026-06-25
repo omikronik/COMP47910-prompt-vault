@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+  <head>
+    <title th:text="${title}">PromptVault</title>
+    <link rel="stylesheet" href="/css/app.css" />
+  </head>
+  <body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    <main>
+      <div th:insert="${content}"></div>
+    </main>
+  </body>
+</html>

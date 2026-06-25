@@ -1,0 +1,905 @@
+$ME
+For my promptvault application, give me how I should structure and deliver my thymeleaf ui. I am a complete beginner to thymeleaf, what is the conventions coming from someone with a lot of next/react experience and some .net razor experience
+
+$GPT
+Coming from **React/Next.js** and some **ASP.NET Razor**, the biggest mindset shift is:
+
+> Thymeleaf is not a frontend application. It's server-side HTML templating.
+
+You are not building components that run in the browser. You're building HTML pages that Spring renders on the server and sends to the client.
+
+For an assignment like PromptVault, I would keep it extremely simple.
+
+---
+
+# Think MVC, not SPA
+
+In React you think:
+
+```text
+Page
+ ├─ Components
+ ├─ State
+ ├─ API calls
+ └─ Routing
+```
+
+In Spring + Thymeleaf think:
+
+```text
+Controller
+ ├─ Gets data
+ ├─ Returns View
+ │
+View (Thymeleaf)
+ ├─ Displays data
+ └─ Posts forms
+
+Service
+ └─ Business logic
+
+Repository
+ └─ Database
+```
+
+Example:
+
+```java
+@GetMapping("/prompts")
+public String listPrompts(Model model) {
+
+    var prompts = promptService.getPromptsForUser();
+
+    model.addAttribute("prompts", prompts);
+
+    return "prompt/list";
+}
+```
+
+Thymeleaf:
+
+```html
+<tr th:each="prompt : ${prompts}">
+    <td th:text="${prompt.title}"></td>
+</tr>
+```
+
+No API.
+No fetch.
+No useEffect.
+
+---
+
+# Recommended Structure
+
+For PromptVault:
+
+```text
+src/main/resources/
+│
+├── templates/
+│   │
+│   ├── fragments/
+│   │   ├── header.html
+│   │   ├── navbar.html
+│   │   ├── footer.html
+│   │
+│   ├── auth/
+│   │   ├── login.html
+│   │   └── register.html
+│   │
+│   ├── prompt/
+│   │   ├── list.html
+│   │   ├── create.html
+│   │   ├── edit.html
+│   │   └── details.html
+│   │
+│   ├── conversation/
+│   │   ├── list.html
+│   │   └── details.html
+│   │
+│   ├── admin/
+│   │   ├── dashboard.html
+│   │   ├── users.html
+│   │   ├── categories.html
+│   │   ├── policy-keywords.html
+│   │   └── flagged-prompts.html
+│   │
+│   ├── home.html
+│   └── dashboard.html
+│
+└── static/
+    │
+    ├── css/
+    │   └── app.css
+    │
+    ├── js/
+    │   └── app.js
+    │
+    └── images/
+```
+
+This is probably the most common structure you'll see.
+
+---
+
+# Equivalent to React Components
+
+Use Thymeleaf fragments.
+
+React:
+
+```jsx
+<Navbar />
+```
+
+Thymeleaf:
+
+```html
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+```
+
+---
+
+## navbar.html
+
+```html
+<nav th:fragment="navbar">
+    ...
+</nav>
+```
+
+---
+
+# Use a Layout
+
+Instead of duplicating HTML.
+
+Create:
+
+```text
+templates/fragments/layout.html
+```
+
+Example:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title th:text="${title}">PromptVault</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main>
+    <div th:insert="${content}"></div>
+</main>
+
+</body>
+</html>
+```
+
+Although for a university assignment, honestly, even just:
+
+```html
+<header>
+<nav>...</nav>
+</header>
+
+<main>
+...
+</main>
+```
+
+copied into each page is acceptable if time is limited.
+
+---
+
+# Controllers Should Map To Folder Structure
+
+I like this convention:
+
+```text
+AuthController
+PromptController
+ConversationController
+AdminController
+HomeController
+```
+
+Returning:
+
+```java
+return "auth/login";
+```
+
+```java
+return "prompt/list";
+```
+
+```java
+return "admin/users";
+```
+
+The returned string matches the folder.
+
+Very easy to navigate.
+
+---
+
+# Forms Are The Main Interaction Model
+
+React:
+
+```jsx
+onSubmit={() => savePrompt()}
+```
+
+Thymeleaf:
+
+```html
+<form th:action="@{/prompts/create}"
+      method="post">
+
+    <input
+        type="text"
+        name="title">
+
+    <button type="submit">
+        Save
+    </button>
+
+</form>
+```
+
+Controller:
+
+```java
+@PostMapping("/create")
+public String create(CreatePromptRequest request) {
+
+    promptService.create(request);
+
+    return "redirect:/prompts";
+}
+```
+
+The controller receives the form directly.
+
+---
+
+# DTO Convention
+
+Coming from .NET, think ViewModels.
+
+Don't bind entities directly.
+
+```text
+dto/
+│
+├── auth/
+│   ├── LoginRequest
+│   └── RegisterRequest
+│
+├── prompt/
+│   ├── CreatePromptRequest
+│   ├── UpdatePromptRequest
+│   └── PromptViewModel
+│
+└── admin/
+```
+
+Controller:
+
+```java
+@PostMapping
+public String create(
+    @Valid CreatePromptRequest request
+)
+```
+
+Very similar to ASP.NET MVC.
+
+---
+
+# For Tables
+
+Admin users page:
+
+```html
+<table>
+
+<tr>
+    <th>Username</th>
+    <th>Email</th>
+    <th>Status</th>
+</tr>
+
+<tr th:each="user : ${users}">
+    <td th:text="${user.username}"></td>
+    <td th:text="${user.email}"></td>
+    <td th:text="${user.active}"></td>
+</tr>
+
+</table>
+```
+
+This replaces React's:
+
+```jsx
+users.map(...)
+```
+
+---
+
+# Flash Messages
+
+You'll use these a lot.
+
+Controller:
+
+```java
+redirectAttributes.addFlashAttribute(
+    "success",
+    "Prompt created successfully"
+);
+
+return "redirect:/prompts";
+```
+
+View:
+
+```html
+<div
+    class="alert"
+    th:if="${success}"
+    th:text="${success}">
+</div>
+```
+
+Very common Spring MVC pattern.
+
+---
+
+# Suggested Screens For PromptVault
+
+You only need about 10 pages.
+
+## Public
+
+```text
+/login
+/register
+```
+
+---
+
+## User
+
+```text
+/dashboard
+
+/prompts
+/prompts/create
+/prompts/{id}/edit
+
+/shared-prompts
+
+/conversations
+/conversations/{id}
+```
+
+---
+
+## Admin
+
+```text
+/admin
+
+/admin/users
+
+/admin/categories
+
+/admin/policy-keywords
+
+/admin/flagged-prompts
+```
+
+This covers virtually every requirement in the assignment. 
+
+---
+
+# Bootstrap Recommendation
+
+For a university project:
+
+Use:
+
+[Bootstrap 5](https://getbootstrap.com?utm_source=chatgpt.com)
+
+Don't write a custom design system.
+
+Just:
+
+```html
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+rel="stylesheet">
+```
+
+Then:
+
+```html
+<div class="container">
+```
+
+```html
+<div class="card">
+```
+
+```html
+<table class="table">
+```
+
+```html
+<button class="btn btn-primary">
+```
+
+You'll get 90% of the UI done in an afternoon.
+
+---
+
+# If I Were Building PromptVault
+
+I'd structure it like:
+
+```text
+templates/
+│
+├── fragments/
+│   ├── navbar.html
+│   └── footer.html
+│
+├── auth/
+│   ├── login.html
+│   └── register.html
+│
+├── prompt/
+│   ├── list.html
+│   ├── create.html
+│   └── edit.html
+│
+├── conversation/
+│   ├── list.html
+│   └── details.html
+│
+├── admin/
+│   ├── users.html
+│   ├── categories.html
+│   ├── policy-keywords.html
+│   └── flagged-prompts.html
+│
+└── dashboard.html
+```
+
+and keep the entire frontend to plain Thymeleaf + Bootstrap.
+
+For this assignment, that's the lowest-effort path that still looks professional and aligns with normal Spring MVC conventions.
+
+$ME
+give me the basic controller boilerplate for all of the relevant page controllers from my readme
+
+$GPT
+Based on your README requirements and the entity design in `design.md`, I'd keep the controllers separated by feature rather than trying to create one giant controller.
+
+For a Spring Boot MVC + Thymeleaf app, I'd expect something like:
+
+```text
+controller/
+├── HomeController
+├── AuthController
+├── DashboardController
+├── PromptController
+├── SharedPromptController
+├── ConversationController
+├── AdminUserController
+├── AdminCategoryController
+├── AdminPolicyKeywordController
+└── AdminFlaggedPromptController
+```
+
+---
+
+# HomeController
+
+```java
+@Controller
+public class HomeController {
+
+    @GetMapping("/")
+    public String home() {
+        return "home";
+    }
+}
+```
+
+---
+
+# AuthController
+
+Handles login/logout/register.
+
+```java
+@Controller
+@RequestMapping("/auth")
+public class AuthController {
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "auth/login";
+    }
+
+    @PostMapping("/login")
+    public String login() {
+
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/register")
+    public String registerPage() {
+        return "auth/register";
+    }
+
+    @PostMapping("/register")
+    public String register() {
+
+        return "redirect:/auth/login";
+    }
+
+    @PostMapping("/logout")
+    public String logout() {
+
+        return "redirect:/auth/login";
+    }
+}
+```
+
+---
+
+# DashboardController
+
+Landing page after login.
+
+```java
+@Controller
+@RequestMapping("/dashboard")
+public class DashboardController {
+
+    @GetMapping
+    public String dashboard() {
+
+        return "dashboard";
+    }
+}
+```
+
+---
+
+# PromptController
+
+CRUD for a user's own prompts.
+
+```java
+@Controller
+@RequestMapping("/prompts")
+public class PromptController {
+
+    @GetMapping
+    public String listPrompts(Model model) {
+
+        return "prompt/list";
+    }
+
+    @GetMapping("/create")
+    public String createPromptPage(Model model) {
+
+        return "prompt/create";
+    }
+
+    @PostMapping("/create")
+    public String createPrompt() {
+
+        return "redirect:/prompts";
+    }
+
+    @GetMapping("/{id}")
+    public String viewPrompt(
+            @PathVariable Long id,
+            Model model) {
+
+        return "prompt/details";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editPromptPage(
+            @PathVariable Long id,
+            Model model) {
+
+        return "prompt/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String editPrompt(
+            @PathVariable Long id) {
+
+        return "redirect:/prompts";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deletePrompt(
+            @PathVariable Long id) {
+
+        return "redirect:/prompts";
+    }
+}
+```
+
+---
+
+# SharedPromptController
+
+Browse public prompts.
+
+```java
+@Controller
+@RequestMapping("/shared-prompts")
+public class SharedPromptController {
+
+    @GetMapping
+    public String browseSharedPrompts(
+            Model model) {
+
+        return "prompt/shared";
+    }
+
+    @GetMapping("/{id}")
+    public String viewSharedPrompt(
+            @PathVariable Long id,
+            Model model) {
+
+        return "prompt/shared-details";
+    }
+}
+```
+
+---
+
+# ConversationController
+
+Your README calls this prompt submission history. Your design evolved that into conversations/messages.
+
+```java
+@Controller
+@RequestMapping("/conversations")
+public class ConversationController {
+
+    @GetMapping
+    public String listConversations(
+            Model model) {
+
+        return "conversation/list";
+    }
+
+    @GetMapping("/{id}")
+    public String viewConversation(
+            @PathVariable Long id,
+            Model model) {
+
+        return "conversation/details";
+    }
+
+    @PostMapping("/start/{promptId}")
+    public String startConversation(
+            @PathVariable Long promptId) {
+
+        return "redirect:/conversations/1";
+    }
+
+    @PostMapping("/{id}/message")
+    public String sendMessage(
+            @PathVariable Long id) {
+
+        return "redirect:/conversations/" + id;
+    }
+}
+```
+
+---
+
+# AdminUserController
+
+Matches:
+
+> Manage users
+
+from the assignment. 
+
+```java
+@Controller
+@RequestMapping("/admin/users")
+public class AdminUserController {
+
+    @GetMapping
+    public String listUsers(
+            Model model) {
+
+        return "admin/users";
+    }
+
+    @PostMapping("/{id}/enable")
+    public String enableUser(
+            @PathVariable Long id) {
+
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/{id}/disable")
+    public String disableUser(
+            @PathVariable Long id) {
+
+        return "redirect:/admin/users";
+    }
+}
+```
+
+---
+
+# AdminCategoryController
+
+Matches:
+
+> Manage prompt categories. 
+
+```java
+@Controller
+@RequestMapping("/admin/categories")
+public class AdminCategoryController {
+
+    @GetMapping
+    public String listCategories(
+            Model model) {
+
+        return "admin/categories";
+    }
+
+    @GetMapping("/create")
+    public String createCategoryPage(
+            Model model) {
+
+        return "admin/category-create";
+    }
+
+    @PostMapping("/create")
+    public String createCategory() {
+
+        return "redirect:/admin/categories";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editCategoryPage(
+            @PathVariable Long id,
+            Model model) {
+
+        return "admin/category-edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String editCategory(
+            @PathVariable Long id) {
+
+        return "redirect:/admin/categories";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deleteCategory(
+            @PathVariable Long id) {
+
+        return "redirect:/admin/categories";
+    }
+}
+```
+
+---
+
+# AdminPolicyKeywordController
+
+Matches:
+
+> Manage policy keywords. 
+
+```java
+@Controller
+@RequestMapping("/admin/policy-keywords")
+public class AdminPolicyKeywordController {
+
+    @GetMapping
+    public String listKeywords(
+            Model model) {
+
+        return "admin/policy-keywords";
+    }
+
+    @GetMapping("/create")
+    public String createKeywordPage(
+            Model model) {
+
+        return "admin/keyword-create";
+    }
+
+    @PostMapping("/create")
+    public String createKeyword() {
+
+        return "redirect:/admin/policy-keywords";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editKeywordPage(
+            @PathVariable Long id,
+            Model model) {
+
+        return "admin/keyword-edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String editKeyword(
+            @PathVariable Long id) {
+
+        return "redirect:/admin/policy-keywords";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deleteKeyword(
+            @PathVariable Long id) {
+
+        return "redirect:/admin/policy-keywords";
+    }
+}
+```
+
+---
+
+# AdminFlaggedPromptController
+
+Matches:
+
+> View flagged prompts. 
+
+```java
+@Controller
+@RequestMapping("/admin/flagged-prompts")
+public class AdminFlaggedPromptController {
+
+    @GetMapping
+    public String listFlaggedPrompts(
+            Model model) {
+
+        return "admin/flagged-prompts";
+    }
+
+    @GetMapping("/{id}")
+    public String viewFlaggedPrompt(
+            @PathVariable Long id,
+            Model model) {
+
+        return "admin/flagged-prompt-details";
+    }
+}
+```
+
+---
+
+If this was my project, I'd stop here. That's **9 controllers**, each under ~50 lines, with URLs that map directly to the assignment requirements and Thymeleaf page structure. Anything more granular would be over-engineering for a university CRUD application.
