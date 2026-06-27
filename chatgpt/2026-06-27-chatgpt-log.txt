@@ -1,0 +1,449 @@
+$ME
+i've followed the default layout documentation and have this layout.html:
+```
+<!doctype html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  <head>
+    <title th:text="${title}">PromptVault</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+  </head>
+  <body>
+    <nav></nav>
+    <main>
+      <layout:fragment name="content"> </layout:fragment>
+    </main>
+  </body>
+</html>
+```
+
+im starting off iwth /auth/login with this:
+
+```
+<!doctype html>
+<html
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout}"
+>
+  <head>
+    <title>Login</title>
+  </head>
+  <body>
+    <layout:fragment name="content">
+      <h1>Login</h1>
+    </layout:fragment>
+  </body>
+</html>
+```
+
+however before anything, can you give me a set of css selectors to style my app. I'm not too concerned about how it looks but a dark theme with purple/pink/blue gradient accents, modern sleekish look would be fine for starters, with generous rounding, rounded buttons. buttons should have the gradient as their background, no borders and dark text in them, whereas most other things will have lighter text, make sure to use css variables so colours can be changed from one spot
+
+$GPT
+
+Here's a solid starting point that fits the aesthetic you described. It's intentionally opinionated but not over-designed, and everything is driven by CSS variables so you can reskin the app later by changing a handful of values.
+
+```css
+/* =========================================
+   Theme
+   ========================================= */
+
+:root {
+    /* Backgrounds */
+    --bg: #0f1117;
+    --bg-elevated: #181c25;
+    --bg-hover: #232938;
+
+    /* Text */
+    --text: #f3f4f6;
+    --text-muted: #9ea7b8;
+    --text-dark: #0f1117;
+
+    /* Borders */
+    --border: #2f3647;
+
+    /* Accent */
+    --primary: #7c5cff;
+    --secondary: #3ea6ff;
+    --tertiary: #ff69d4;
+
+    --gradient: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--secondary),
+        var(--tertiary)
+    );
+
+    /* Status */
+    --success: #38d39f;
+    --warning: #ffcc66;
+    --danger: #ff6b81;
+
+    /* Radius */
+    --radius-sm: 8px;
+    --radius: 14px;
+    --radius-lg: 22px;
+    --radius-pill: 999px;
+
+    /* Shadows */
+    --shadow:
+        0 8px 30px rgba(0,0,0,.35);
+
+    --shadow-lg:
+        0 18px 50px rgba(0,0,0,.5);
+
+    /* Spacing */
+
+    --space-xs: .35rem;
+    --space-sm: .75rem;
+    --space: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2.5rem;
+
+    /* Widths */
+
+    --content-width: 1200px;
+}
+
+/* =========================================
+   Reset
+   ========================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family:
+        Inter,
+        Segoe UI,
+        Roboto,
+        sans-serif;
+
+    line-height: 1.5;
+}
+
+/* =========================================
+   Typography
+   ========================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    font-weight: 600;
+}
+
+p {
+    color: var(--text-muted);
+}
+
+a {
+    color: var(--secondary);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* =========================================
+   Layout
+   ========================================= */
+
+nav {
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 var(--space-xl);
+
+    border-bottom: 1px solid var(--border);
+
+    background: rgba(15,17,23,.85);
+
+    backdrop-filter: blur(12px);
+}
+
+main {
+    width: min(100%, var(--content-width));
+
+    margin: 0 auto;
+
+    padding: var(--space-xl);
+}
+
+/* =========================================
+   Cards
+   ========================================= */
+
+.card {
+    background: var(--bg-elevated);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-lg);
+
+    padding: var(--space-lg);
+
+    box-shadow: var(--shadow);
+}
+
+/* =========================================
+   Forms
+   ========================================= */
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space);
+}
+
+label {
+    font-size: .9rem;
+    color: var(--text-muted);
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+
+    padding: .9rem 1rem;
+
+    background: var(--bg-hover);
+
+    color: var(--text);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    font: inherit;
+
+    transition:
+        border .2s,
+        background .2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+
+    border-color: var(--primary);
+
+    background: var(--bg-elevated);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* =========================================
+   Buttons
+   ========================================= */
+
+button,
+.btn {
+    display: inline-flex;
+
+    justify-content: center;
+    align-items: center;
+
+    gap: .5rem;
+
+    padding: .9rem 1.4rem;
+
+    border: none;
+
+    border-radius: var(--radius-pill);
+
+    background: var(--gradient);
+
+    color: var(--text-dark);
+
+    font: inherit;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform .15s,
+        opacity .2s,
+        box-shadow .2s;
+
+    box-shadow: var(--shadow);
+}
+
+button:hover,
+.btn:hover {
+    transform: translateY(-1px);
+    opacity: .95;
+}
+
+button:active,
+.btn:active {
+    transform: translateY(1px);
+}
+
+button:disabled,
+.btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   Tables
+   ========================================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    background: var(--bg-elevated);
+
+    border-radius: var(--radius-lg);
+
+    overflow: hidden;
+}
+
+th,
+td {
+    padding: 1rem;
+    text-align: left;
+}
+
+thead {
+    background: rgba(255,255,255,.03);
+}
+
+tbody tr {
+    border-top: 1px solid var(--border);
+}
+
+tbody tr:hover {
+    background: rgba(255,255,255,.025);
+}
+
+/* =========================================
+   Utility
+   ========================================= */
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: var(--space);
+}
+
+.space-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.mt {
+    margin-top: var(--space);
+}
+
+.mt-lg {
+    margin-top: var(--space-lg);
+}
+
+.mb {
+    margin-bottom: var(--space);
+}
+
+.mb-lg {
+    margin-bottom: var(--space-lg);
+}
+
+/* =========================================
+   Alerts
+   ========================================= */
+
+.alert {
+    padding: 1rem;
+
+    border-radius: var(--radius);
+
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background: rgba(56,211,159,.15);
+    border-color: var(--success);
+}
+
+.alert-warning {
+    background: rgba(255,204,102,.15);
+    border-color: var(--warning);
+}
+
+.alert-danger {
+    background: rgba(255,107,129,.15);
+    border-color: var(--danger);
+}
+```
+
+A couple of recommendations based on your React experience:
+
+* Wrap every page in a `.card` rather than placing content directly into `main`. It gives the app immediate visual structure.
+* Add a `.container` utility if you ever need narrower pages (e.g. login/register):
+
+```css
+.container {
+    width: min(100%, 1200px);
+    margin: 0 auto;
+}
+
+.container-sm {
+    width: min(100%, 480px);
+    margin: 0 auto;
+}
+```
+
+Then your login page becomes as simple as:
+
+```html
+<div class="container-sm">
+    <div class="card">
+        <h1>Login</h1>
+        ...
+    </div>
+</div>
+```
+
+This is a very common layout pattern in Spring MVC/Thymeleaf applications and will give you a clean, modern look with minimal CSS.
