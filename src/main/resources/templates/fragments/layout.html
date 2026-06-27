@@ -1,13 +1,20 @@
 <!doctype html>
-<html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
   <head>
-    <title th:text="${title}">PromptVault</title>
-    <link rel="stylesheet" href="/css/app.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title th:text="${title} ?: 'PromptVault'">PromptVault</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
   </head>
+
   <body>
-    <div th:replace="~{fragments/navbar :: navbar}"></div>
-    <main>
-      <div th:insert="${content}"></div>
-    </main>
+    <nav>PromptVault</nav>
+
+    <main layout:fragment="content"></main>
   </body>
 </html>
