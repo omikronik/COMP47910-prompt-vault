@@ -13,6 +13,19 @@
       <div class="container-sm">
         <div class="card">
           <h1>Login</h1>
+          <form method="post" action="/auth/login">
+            <div>
+              <label for="email">Email</label>
+              <input type="text" name="email" />
+            </div>
+            <div>
+              <label for="password">Password</label>
+              <input type="password" name="password" />
+            </div>
+            <div>
+              <input type="submit" value="login" />
+            </div>
+          </form>
         </div>
       </div>
     </div>

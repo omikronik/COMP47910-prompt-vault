@@ -2,9 +2,15 @@ package com.yasirceltik.promptvault.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.yasirceltik.promptvault.dto.LoginRequest;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
@@ -15,7 +21,8 @@ public class AuthController {
 	}
 
 	@PostMapping("/login")
-	public String login() {
+	public String login(@ModelAttribute LoginRequest loginRequest) {
+		log.info("Entering login for email: " + loginRequest.email());
 		return "redirect:/dashboard";
 	}
 
