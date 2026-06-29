@@ -1,0 +1,86 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${title} ?: 'PromptVault'">PromptVault</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+  </head>
+
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <span>PromptVault</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a th:href="@{/dashboard}">Dashboard</a>
+          <a th:href="@{/prompts}">My Prompts</a>
+          <a th:href="@{/prompts/create}">New Prompt</a>
+          <a th:href="@{/prompts/shared}">Shared Prompts</a>
+        </nav>
+
+        <div th:if="${isAdmin}">
+          <div class="sidebar-section-label">Admin</div>
+          <nav class="sidebar-admin">
+            <a th:href="@{/admin/users}">Users</a>
+            <a th:href="@{/admin/categories}">Categories</a>
+            <a th:href="@{/admin/policy-keywords}">Policy Keywords</a>
+            <a th:href="@{/admin/flagged-prompts}">Flagged Prompts</a>
+            <a th:href="@{/admin/flagged-conversations}"
+              >Flagged Conversations</a
+            >
+          </nav>
+        </div>
+
+        <section class="sidebar-conversations">
+          <div class="sidebar-conv-header">
+            <h3>Conversations</h3>
+            <form
+              method="post"
+              th:action="@{/conversations/start}"
+              class="inline-form"
+            >
+              <button
+                class="sidebar-new-btn"
+                type="submit"
+                title="New Conversation"
+              >
+                +
+              </button>
+            </form>
+          </div>
+          <div th:if="${#lists.isEmpty(sidebarConversations)}">
+            <p class="text-muted">No conversations yet</p>
+          </div>
+
+          <a
+            th:each="conversation : ${sidebarConversations}"
+            th:href="@{/conversations/{id}(id=${conversation.id})}"
+            th:text="${conversation.title}"
+          >
+            Conversation title
+          </a>
+        </section>
+
+        <section class="sidebar-user">
+          <span class="label">Logged in as</span>
+          <strong th:text="${user.username ?: user.email}">username</strong>
+          <form method="post" th:action="@{/auth/logout}">
+            <button type="submit">Logout</button>
+          </form>
+        </section>
+      </aside>
+
+      <main class="app-main">
+        <div class="app-content">
+          <div layout:fragment="content"></div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>Edit User</title>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>Edit User</h1>
+          <p class="text-muted" th:text="${target.email}">user@example.com</p>
+        </div>
+        <a class="btn btn-secondary btn-sm" th:href="@{/admin/users}">Back</a>
+      </div>
+
+      <div class="card">
+        <form
+          method="post"
+          th:action="@{/admin/users/{id}/edit(id=${target.id})}"
+        >
+          <div class="form-group">
+            <label>Email</label>
+            <input type="text" th:value="${target.email}" disabled />
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <input type="text" th:value="${target.role}" disabled />
+          </div>
+          <div class="form-group">
+            <label>Login Attempts</label>
+            <input type="text" th:value="${target.loginAttempts}" disabled />
+          </div>
+          <div class="form-group">
+            <label>Joined</label>
+            <input
+              type="text"
+              th:value="${#temporals.format(target.createdOn, 'dd MMM yyyy HH:mm')}"
+              disabled
+            />
+          </div>
+          <div class="form-group">
+            <label for="isActive">Account Status</label>
+            <select id="isActive" name="isActive">
+              <option value="true" th:selected="${target.isActive}">
+                Active
+              </option>
+              <option value="false" th:selected="${!target.isActive}">
+                Disabled
+              </option>
+            </select>
+          </div>
+          <input type="submit" value="Save Changes" />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

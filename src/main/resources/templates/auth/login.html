@@ -2,7 +2,7 @@
 <html
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{fragments/layout}"
+  layout:decorate="~{fragments/layout-public}"
 >
   <head>
     <title>Login</title>
@@ -10,23 +10,39 @@
 
   <body>
     <div layout:fragment="content">
-      <div class="container-sm">
-        <div class="card">
-          <h1>Login</h1>
-          <form method="post" action="/auth/login">
-            <div>
-              <label for="email">Email</label>
-              <input type="text" name="email" />
-            </div>
-            <div>
-              <label for="password">Password</label>
-              <input type="password" name="password" />
-            </div>
-            <div>
-              <input type="submit" value="login" />
-            </div>
-          </form>
-        </div>
+      <div class="card card-shiny">
+        <h1 style="margin-bottom: 0.25rem">Welcome back</h1>
+        <p class="text-muted" style="margin-bottom: 1.5rem">
+          Sign in to your PromptVault account.
+        </p>
+
+        <div
+          th:if="${success}"
+          class="alert alert-success mb"
+          th:text="${success}"
+        ></div>
+        <div
+          th:if="${error}"
+          class="alert alert-danger mb"
+          th:text="${error}"
+        ></div>
+
+        <form method="post" th:action="@{/auth/login}">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required />
+          </div>
+          <input type="submit" value="Sign In" />
+        </form>
+
+        <p class="text-center mt" style="font-size: 0.9rem">
+          Don't have an account?
+          <a th:href="@{/auth/register}">Register</a>
+        </p>
       </div>
     </div>
   </body>

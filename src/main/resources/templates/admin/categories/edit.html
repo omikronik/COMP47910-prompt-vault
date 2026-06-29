@@ -1,0 +1,53 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>Edit Category</title>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>Edit Category</h1>
+          <p class="text-muted" th:text="${category.name}">Category name</p>
+        </div>
+        <a class="btn btn-secondary btn-sm" th:href="@{/admin/categories}"
+          >Back</a
+        >
+      </div>
+
+      <div class="card">
+        <form
+          method="post"
+          th:action="@{/admin/categories/{id}/edit(id=${category.id})}"
+        >
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              maxlength="255"
+              required
+              th:value="${category.name}"
+            />
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              maxlength="255"
+              required
+              th:text="${category.description}"
+            ></textarea>
+          </div>
+          <input type="submit" value="Save Changes" />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

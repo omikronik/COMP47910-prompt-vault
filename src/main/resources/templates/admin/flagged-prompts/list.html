@@ -1,0 +1,84 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>Flagged Prompts</title>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>Flagged Prompts</h1>
+          <p class="text-muted">
+            Prompts containing one or more policy keywords.
+          </p>
+        </div>
+      </div>
+
+      <div th:if="${#lists.isEmpty(matches)}" class="card text-center">
+        <h2>No flagged prompts</h2>
+        <p>No prompts have triggered a policy keyword.</p>
+      </div>
+
+      <table th:if="${!#lists.isEmpty(matches)}">
+        <thead>
+          <tr>
+            <th>Prompt</th>
+            <th>Owner</th>
+            <th>Category</th>
+            <th>Flagged Keyword</th>
+            <th>Submitted</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="match : ${matches}">
+            <td th:text="${match.prompt.title}">Prompt title</td>
+            <td
+              class="text-muted"
+              th:text="${match.prompt.owner.username ?: match.prompt.owner.email}"
+            >
+              username
+            </td>
+            <td>
+              <span
+                th:if="${match.prompt.category != null}"
+                class="badge badge-primary"
+                th:text="${match.prompt.category.name}"
+                >Category</span
+              >
+              <span th:if="${match.prompt.category == null}" class="text-muted"
+                >—</span
+              >
+            </td>
+            <td>
+              <span class="badge badge-danger" th:text="${match.policy.content}"
+                >keyword</span
+              >
+            </td>
+            <td
+              class="text-muted"
+              th:text="${#temporals.format(match.prompt.createdOn, 'dd MMM yyyy')}"
+            >
+              01 Jan 2026
+            </td>
+            <td>
+              <form
+                method="post"
+                th:action="@{/admin/flagged-prompts/{id}/delete(id=${match.prompt.id})}"
+                onsubmit="return confirm('Permanently delete this prompt?');"
+              >
+                <button class="btn btn-danger btn-sm" type="submit">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

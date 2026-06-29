@@ -1,0 +1,115 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>Dashboard</title>
+  </head>
+
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>Submission History</h1>
+          <p class="text-muted">Your past AI conversations.</p>
+        </div>
+        <form method="post" th:action="@{/conversations/start}">
+          <button class="btn" type="submit">New Conversation</button>
+        </form>
+      </div>
+
+      <div th:if="${#lists.isEmpty(conversations)}" class="card text-center">
+        <h2>No conversations yet</h2>
+        <p>Use a prompt or start a new conversation to get going.</p>
+        <div
+          class="row"
+          style="justify-content: center; margin-top: var(--space)"
+        >
+          <a class="btn btn-secondary" th:href="@{/prompts}">My Prompts</a>
+          <form method="post" th:action="@{/conversations/start}">
+            <button class="btn" type="submit">New Conversation</button>
+          </form>
+        </div>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(conversations)}" class="stack">
+        <article class="card" th:each="conv : ${conversations}">
+          <div class="space-between">
+            <div>
+              <h2 th:text="${conv.title}">Conversation title</h2>
+              <div
+                class="row"
+                style="margin-top: 0.25rem; flex-wrap: wrap; gap: 0.5rem"
+              >
+                <span
+                  th:if="${conv.prompt != null}"
+                  class="badge badge-primary"
+                  th:text="${conv.prompt.title}"
+                  >Prompt</span
+                >
+                <span th:if="${conv.prompt == null}" class="badge badge-muted"
+                  >No prompt</span
+                >
+                <span
+                  class="text-muted"
+                  style="font-size: 0.82rem"
+                  th:text="${#temporals.format(conv.createdOn, 'dd MMM yyyy HH:mm')}"
+                  >date</span
+                >
+              </div>
+            </div>
+            <a
+              class="btn btn-secondary btn-sm"
+              th:href="@{/conversations/{id}(id=${conv.id})}"
+              >Open</a
+            >
+          </div>
+
+          <th:block
+            th:with="aiMessages=${conv.messages.?[role.name() == 'AGENT']}"
+          >
+            <div
+              th:if="${!aiMessages.isEmpty()}"
+              class="text-muted"
+              style="
+                margin-top: var(--space);
+                font-size: 0.88rem;
+                border-top: 1px solid var(--border);
+                padding-top: var(--space);
+              "
+            >
+              <span
+                style="
+                  font-size: 0.72rem;
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  color: var(--text-muted);
+                  display: block;
+                  margin-bottom: 0.25rem;
+                "
+                >Last AI response</span
+              >
+              <span th:text="${aiMessages[aiMessages.size()-1].content}"
+                >AI response</span
+              >
+            </div>
+            <div
+              th:if="${aiMessages.isEmpty()}"
+              class="text-muted"
+              style="
+                margin-top: var(--space);
+                font-size: 0.88rem;
+                border-top: 1px solid var(--border);
+                padding-top: var(--space);
+              "
+            >
+              No messages yet.
+            </div>
+          </th:block>
+        </article>
+      </div>
+    </div>
+  </body>
+</html>

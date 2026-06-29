@@ -22,16 +22,17 @@ public class ConversationMessage {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@ManyToOne
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "conversation_id")
-	private Conversation conversationId;
+	private Conversation conversation;
 
 	@Column(nullable = false)
 	private String content;
 
 	private Boolean policyFlagged;
 
-	private String role;
+	@Enumerated(EnumType.STRING)
+	private ChatRole role;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)

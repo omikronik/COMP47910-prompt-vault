@@ -6,15 +6,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <title th:text="${title} ?: 'PromptVault'">PromptVault</title>
-
     <link rel="stylesheet" th:href="@{/css/app.css}" />
   </head>
 
   <body>
-    <nav>PromptVault</nav>
-
-    <main layout:fragment="content"></main>
+    <div class="public-shell">
+      <div class="public-brand">
+        <span>PromptVault</span>
+      </div>
+      <div class="container-sm w-full">
+        <div layout:fragment="content"></div>
+      </div>
+    </div>
   </body>
 </html>

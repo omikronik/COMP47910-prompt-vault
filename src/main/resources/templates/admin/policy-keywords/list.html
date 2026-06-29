@@ -1,0 +1,75 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>Policy Keywords</title>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>Policy Keywords</h1>
+          <p class="text-muted">
+            Keywords that trigger a policy flag on submitted prompts.
+          </p>
+        </div>
+        <a class="btn" th:href="@{/admin/policy-keywords/create}"
+          >New Keyword</a
+        >
+      </div>
+
+      <div th:if="${#lists.isEmpty(keywords)}" class="card text-center">
+        <h2>No keywords yet</h2>
+        <p>Add your first policy keyword.</p>
+        <a class="btn mt" th:href="@{/admin/policy-keywords/create}"
+          >Add Keyword</a
+        >
+      </div>
+
+      <table th:if="${!#lists.isEmpty(keywords)}">
+        <thead>
+          <tr>
+            <th>Keyword</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="kw : ${keywords}">
+            <td th:text="${kw.content}">keyword</td>
+            <td
+              class="text-muted"
+              th:text="${#temporals.format(kw.createdOn, 'dd MMM yyyy')}"
+            >
+              01 Jan 2026
+            </td>
+            <td class="row">
+              <a
+                class="btn btn-secondary btn-sm"
+                th:href="@{/admin/policy-keywords/{id}(id=${kw.id})}"
+                >View</a
+              >
+              <a
+                class="btn btn-secondary btn-sm"
+                th:href="@{/admin/policy-keywords/{id}/edit(id=${kw.id})}"
+                >Edit</a
+              >
+              <form
+                method="post"
+                th:action="@{/admin/policy-keywords/{id}/delete(id=${kw.id})}"
+                onsubmit="return confirm('Delete this keyword?');"
+              >
+                <button class="btn btn-danger btn-sm" type="submit">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

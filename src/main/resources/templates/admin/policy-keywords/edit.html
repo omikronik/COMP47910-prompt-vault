@@ -1,0 +1,43 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>Edit Keyword</title>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>Edit Keyword</h1>
+          <p class="text-muted" th:text="${keyword.content}">keyword</p>
+        </div>
+        <a class="btn btn-secondary btn-sm" th:href="@{/admin/policy-keywords}"
+          >Back</a
+        >
+      </div>
+
+      <div class="card">
+        <form
+          method="post"
+          th:action="@{/admin/policy-keywords/{id}/edit(id=${keyword.id})}"
+        >
+          <div class="form-group">
+            <label for="content">Keyword</label>
+            <input
+              type="text"
+              id="content"
+              name="content"
+              maxlength="255"
+              required
+              th:value="${keyword.content}"
+            />
+          </div>
+          <input type="submit" value="Save Changes" />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

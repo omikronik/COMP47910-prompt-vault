@@ -35,13 +35,13 @@ public class Prompt {
 
 	@Enumerated(EnumType.STRING)
 	@Builder.Default
-	private PromptVisibility visibility = PromptVisibility.VISIBLE;
+	private PromptVisibility visibility = PromptVisibility.PRIVATE;
 
 	private Boolean policyFlagged;
 
 	@ManyToOne
 	@JoinColumn(name = "category_id")
-	private PromptCategory categoryId;
+	private PromptCategory category;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)

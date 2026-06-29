@@ -1,0 +1,94 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title th:text="${conversation.title}">Conversation</title>
+  </head>
+
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1 th:text="${conversation.title}">Conversation</h1>
+          <p class="text-muted" th:if="${conversation.prompt != null}">
+            Using prompt:
+            <span th:text="${conversation.prompt.title}">Prompt title</span>
+          </p>
+        </div>
+        <a class="btn btn-secondary btn-sm" th:href="@{/prompts}">My Prompts</a>
+      </div>
+
+      <div class="chat-container" id="chat-container">
+        <div
+          th:if="${#lists.isEmpty(messages)}"
+          class="text-center text-muted"
+          style="padding: 2rem 0"
+        >
+          <p>No messages yet. Send one below to start.</p>
+        </div>
+
+        <div
+          th:each="msg : ${messages}"
+          th:class="${msg.role.name() == 'USER'} ? 'message message-user' : 'message message-agent'"
+          th:classappend="${msg.policyFlagged} ? ' message-flagged' : ''"
+        >
+          <div class="message-inner">
+            <div class="message-bubble" th:text="${msg.content}">message</div>
+            <div th:if="${msg.policyFlagged}" class="message-flag-alert">
+              &#9888; This message was flagged for sensitive content
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <form
+          method="post"
+          th:action="@{/conversations/{id}/messages(id=${conversation.id})}"
+          id="chat-form"
+        >
+          <div class="chat-input-row">
+            <textarea
+              id="chat-textarea"
+              name="content"
+              placeholder="Type a message…"
+              rows="1"
+              required
+            ></textarea>
+            <button id="send-btn" class="btn btn-sm" type="submit">Send</button>
+          </div>
+        </form>
+      </div>
+
+      <script>
+        window.scrollTo(0, document.body.scrollHeight);
+
+        const form = document.getElementById("chat-form");
+        const textarea = document.getElementById("chat-textarea");
+        const sendBtn = document.getElementById("send-btn");
+
+        form.addEventListener("submit", function () {
+          textarea.readOnly = true;
+          textarea.style.opacity = "0.5";
+          sendBtn.disabled = true;
+          sendBtn.textContent = "Sending…";
+        });
+
+        textarea.addEventListener("input", function () {
+          this.style.height = "auto";
+          this.style.height = Math.min(this.scrollHeight, 180) + "px";
+        });
+
+        textarea.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            form.requestSubmit();
+          }
+        });
+      </script>
+    </div>
+  </body>
+</html>

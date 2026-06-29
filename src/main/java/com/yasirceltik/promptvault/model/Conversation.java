@@ -2,6 +2,9 @@ package com.yasirceltik.promptvault.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,8 +30,8 @@ public class Conversation {
 	private String title;
 
 	@ManyToOne
-	@JoinColumn(name = "prompt_id")
-	private Prompt promptId;
+	@JoinColumn(name = "prompt_id", nullable = true)
+	private Prompt prompt;
 
 	@ManyToOne
 	@JoinColumn(name = "owner")
@@ -47,4 +50,12 @@ public class Conversation {
 	@UpdateTimestamp
 	@Column(nullable = false)
 	private LocalDateTime updatedOn;
+
+	@ManyToOne
+	@JoinColumn(name = "updated_by")
+	private User updatedBy;
+
+	@OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OrderBy("createdOn ASC")
+	private List<ConversationMessage> messages = new ArrayList<>();
 }

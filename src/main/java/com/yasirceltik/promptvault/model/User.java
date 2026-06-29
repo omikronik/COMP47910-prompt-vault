@@ -24,6 +24,15 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
+	@Column(nullable = true, length = 255)
+	private String firstName;
+
+	@Column(nullable = true, length = 255)
+	private String lastName;
+
+	@Column(nullable = true, unique = true, length = 255)
+	private String username;
+
 	@Column(nullable = false, unique = true, length = 255)
 	private String email;
 
@@ -34,7 +43,7 @@ public class User {
 	private UserRole role;
 
 	@Column(nullable = false)
-	private Boolean isActive;
+	private boolean active;
 
 	@Column(nullable = false)
 	@Builder.Default

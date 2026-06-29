@@ -24,11 +24,11 @@ public class MessagePolicyMatch {
 
 	@ManyToOne
 	@JoinColumn(name = "message_id")
-	private ConversationMessage messageId;
+	private ConversationMessage message;
 
 	@ManyToOne
 	@JoinColumn(name = "policy_id")
-	private PolicyKeyword policyId;
+	private PolicyKeyword policy;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)

@@ -1,0 +1,73 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>Categories</title>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>Categories</h1>
+          <p class="text-muted">Manage prompt categories.</p>
+        </div>
+        <a class="btn" th:href="@{/admin/categories/create}">New Category</a>
+      </div>
+
+      <div th:if="${#lists.isEmpty(categories)}" class="card text-center">
+        <h2>No categories yet</h2>
+        <p>Create the first prompt category.</p>
+        <a class="btn mt" th:href="@{/admin/categories/create}"
+          >Create Category</a
+        >
+      </div>
+
+      <table th:if="${!#lists.isEmpty(categories)}">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="cat : ${categories}">
+            <td th:text="${cat.name}">Category</td>
+            <td class="text-muted" th:text="${cat.description}">Description</td>
+            <td
+              class="text-muted"
+              th:text="${#temporals.format(cat.createdOn, 'dd MMM yyyy')}"
+            >
+              01 Jan 2026
+            </td>
+            <td class="row">
+              <a
+                class="btn btn-secondary btn-sm"
+                th:href="@{/admin/categories/{id}(id=${cat.id})}"
+                >View</a
+              >
+              <a
+                class="btn btn-secondary btn-sm"
+                th:href="@{/admin/categories/{id}/edit(id=${cat.id})}"
+                >Edit</a
+              >
+              <form
+                method="post"
+                th:action="@{/admin/categories/{id}/delete(id=${cat.id})}"
+                onsubmit="return confirm('Delete this category?');"
+              >
+                <button class="btn btn-danger btn-sm" type="submit">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

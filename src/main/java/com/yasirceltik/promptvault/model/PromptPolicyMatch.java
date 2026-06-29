@@ -24,11 +24,11 @@ public class PromptPolicyMatch {
 
 	@ManyToOne
 	@JoinColumn(name = "prompt_id")
-	private Prompt promptId;
+	private Prompt prompt;
 
 	@ManyToOne
 	@JoinColumn(name = "policy_id")
-	private PolicyKeyword policyId;
+	private PolicyKeyword policy;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)

@@ -1,0 +1,72 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>Shared Prompts</title>
+  </head>
+
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>Shared Prompts</h1>
+          <p class="text-muted">Browse prompts shared by other users.</p>
+        </div>
+      </div>
+
+      <div
+        th:if="${prompts == null or #lists.isEmpty(prompts)}"
+        class="card text-center"
+      >
+        <h2>No shared prompts yet</h2>
+        <p>No one has shared any prompts yet.</p>
+      </div>
+
+      <div
+        th:if="${prompts != null and !#lists.isEmpty(prompts)}"
+        class="stack"
+      >
+        <article class="card" th:each="prompt : ${prompts}">
+          <div class="space-between">
+            <div>
+              <h2 th:text="${prompt.title}">Prompt title</h2>
+              <p
+                class="text-muted"
+                th:text="${prompt.content != null ? prompt.content : 'No content provided'}"
+              >
+                Prompt content
+              </p>
+            </div>
+
+            <div class="row">
+              <span
+                th:if="${prompt.category != null}"
+                class="badge badge-primary"
+                th:text="${prompt.category.name}"
+                >Category</span
+              >
+
+              <span
+                class="badge badge-muted"
+                th:text="${prompt.owner.username ?: prompt.owner.email}"
+                >owner</span
+              >
+            </div>
+          </div>
+
+          <div class="row mt-lg">
+            <form method="post" th:action="@{/conversations/start}">
+              <input type="hidden" name="promptId" th:value="${prompt.id}" />
+              <button class="btn btn-secondary btn-sm" type="submit">
+                Use
+              </button>
+            </form>
+          </div>
+        </article>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{fragments/layout-app}"
+>
+  <head>
+    <title>View Keyword</title>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="page-header">
+        <div>
+          <h1>View Keyword</h1>
+          <p class="text-muted" th:text="${keyword.content}">keyword</p>
+        </div>
+        <div class="row">
+          <a
+            class="btn btn-secondary btn-sm"
+            th:href="@{/admin/policy-keywords}"
+            >Back</a
+          >
+          <a
+            class="btn btn-sm"
+            th:href="@{/admin/policy-keywords/{id}/edit(id=${keyword.id})}"
+            >Edit</a
+          >
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="stack">
+          <div class="form-group">
+            <label>Keyword</label>
+            <input type="text" th:value="${keyword.content}" disabled />
+          </div>
+          <div class="form-group">
+            <label>Created</label>
+            <input
+              type="text"
+              th:value="${#temporals.format(keyword.createdOn, 'dd MMM yyyy HH:mm')}"
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

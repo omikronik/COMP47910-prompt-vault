@@ -2,6 +2,28 @@
 
 ## Yasir Celtik
 
+## How to run
+
+### Database
+
+- I chose to use a docker container in my homelab, if you are on linux/mac you should be able to run
+  `COMP47910-prompt-vault/db/run_mysql_container.sh` to run the db container.
+- I set the password to 'yourpassword' as default, change this in the script if needed
+- set the db connection properties in the application.properties
+  ```
+  spring.datasource.url=jdbc:mysql://<ip>:3306/promptvault
+  spring.datasource.username=promptvault
+  spring.datasource.password=yourpassword
+  ```
+- log in to the database root account and run `create database promptvault` and
+
+### Spring app
+
+- I did not use an IDE so i ran the app with `./mvnw spring-boot:run`
+- you will need to figure out how to run it in an IDE if desired
+- After the app runs, it will seed the database automatically.
+- navigate to `localhost:8080/` to get into the app.
+
 ## Assignment 1 - Prompt Vault
 
 In this assignment, you will develop a simplified web application called
@@ -22,13 +44,13 @@ You are not required to use any external AI API.
 
 ### Required Functionalities for Admin
 
-- [ ] **Log in and log out of the system.** You can assume that admins are already
+- [x] **Log in and log out of the system.** You can assume that admins are already
       registered with a predefined username and password. So, they will only need
       to perform login and logout operations.
-- [ ] **Manage users.** After logging in, an admin can view the list of registered
+- [x] **Manage users.** After logging in, an admin can view the list of registered
       users. Each user should include username, email address, role, and account
       status. The admin should be able to enable or disable a user account.
-- [ ] **Manage prompt categories.**
+- [x] **Manage prompt categories.**
       After logging in, an admin can add, edit, and delete prompt categories. Each
       category should include the category name and description. Examples of
       categories include:
@@ -39,13 +61,13 @@ You are not required to use any external AI API.
   - HR;
   - Personal productivity.
 
-- [ ] **Manage policy keywords.**
+- [x] **Manage policy keywords.**
       After logging in, an admin can add, edit, and delete policy keywords. These
       keywords will be used to identify prompts that may contain sensitive
       information. Examples of policy keywords include: password; API key; secret;
       credit card; private key; confidential; medical record; student number.
 
-- [ ] **View flagged prompts.**
+- [x] **View flagged prompts.**
       After logging in, an admin can view prompts that have been flagged because
       they contain one or more policy keywords. For each flagged prompt, the admin
       should be able to see the prompt title, prompt owner, category, flagged
@@ -53,35 +75,35 @@ You are not required to use any external AI API.
 
 ### **Required Functionalities for Users**
 
-- [ ] **Register in PromptVault.**
+- [x] **Register in PromptVault.**
       Users can register by providing their details: name, surname, username,
       email address, and password.
-- [ ] **Login and logout of the system.**
+- [x] **Login and logout of the system.**
       Registered users can perform the login and should be able to log out after
       performing the login.
-- [ ] **Create a prompt.**
+- [x] **Create a prompt.**
       After logging in, a user can create a prompt. Each prompt should include the
       title, prompt text, category, and visibility status. The visibility status
       can be private or shared.
-- [ ] **View own prompts.**
+- [x] **View own prompts.**
       After logging in, a user can view the list of prompts they created. A user
       should only be able to view their own private prompts.
-- [ ] **Edit and delete own prompts.**
+- [x] **Edit and delete own prompts.**
       After logging in, a user can edit and delete prompts they created. A user
       should not be able to edit or delete prompts created by another user.
-- [ ] **Browse shared prompts.**
+- [x] **Browse shared prompts.**
       A user can browse prompts marked as shared by other users. Private prompts
       should not be visible to other users.
-- [ ] **Submit a prompt to the simulated AI assistant.**
+- [x] **Submit a prompt to the simulated AI assistant.**
       After logging in, a user can submit one of their prompts to the simulated AI
       assistant. The application should display a simulated response. The
       application does not need to contact any external AI service.
-- [ ] **View prompt submission history.**
+- [x] **View prompt submission history.**
       After logging in, a user can view the history of prompts they submitted to
       the simulated AI assistant. The history should include the prompt title,
       submission date, and simulated AI response. A user should only be able to view
       their own submission history.
-- [ ] **Receive a warning for sensitive prompts.**
+- [x] **Receive a warning for sensitive prompts.**
       If a submitted prompt contains one or more policy keywords, the application
       should display a warning message to the user. The prompt should also be
       marked as flagged so that it can be reviewed by the admin.
