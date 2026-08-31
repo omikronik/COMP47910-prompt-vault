@@ -1,6 +1,8 @@
 package com.yasirceltik.promptvault.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
@@ -36,18 +38,33 @@ class AuthControllerTest {
     }
 
     @Test
-    void successfulLoginStoresMinimalPrincipalInSession() {
-        LoginRequestDto request =
-                new LoginRequestDto(
-                        "john@example.com",
-                        "Test1234"
-                );
+    void loginPageReturnsLoginTemplate() {
+        assertEquals(
+                "auth/login",
+                authController.loginPage()
+        );
+    }
+
+    @Test
+    void registerPageReturnsRegisterTemplate() {
+        assertEquals(
+                "auth/register",
+                authController.registerPage()
+        );
+    }
+
+    @Test
+    void successfulLoginStoresPrincipalAndRedirectsToDashboard() {
+        LoginRequestDto request = new LoginRequestDto(
+                "john@example.com",
+                "Test1234"
+        );
 
         User user = User.builder()
                 .id(1L)
                 .username("johnsmith")
                 .email("john@example.com")
-                .password("$2a$10$secretHashThatShouldNotBeInSession")
+                .password("$2a$10$someHash")
                 .role(UserRole.USER)
                 .active(true)
                 .build();
@@ -74,38 +91,21 @@ class AuthControllerTest {
                 captor.capture()
         );
 
-        Object sessionValue = captor.getValue();
-
-        assertInstanceOf(
-                SessionUserDto.class,
-                sessionValue
-        );
-
         SessionUserDto principal =
-                (SessionUserDto) sessionValue;
+                (SessionUserDto) captor.getValue();
 
         assertEquals(1L, principal.id());
-        assertEquals(
-                "johnsmith",
-                principal.username()
-        );
-        assertEquals(
-                "john@example.com",
-                principal.email()
-        );
-        assertEquals(
-                UserRole.USER,
-                principal.role()
-        );
+        assertEquals("johnsmith", principal.username());
+        assertEquals("john@example.com", principal.email());
+        assertEquals(UserRole.USER, principal.role());
     }
 
     @Test
-    void failedLoginDoesNotStoreAnythingInSession() {
-        LoginRequestDto request =
-                new LoginRequestDto(
-                        "john@example.com",
-                        "WrongPassword"
-                );
+    void failedLoginRedirectsToLoginAndDoesNotCreatePrincipal() {
+        LoginRequestDto request = new LoginRequestDto(
+                "john@example.com",
+                "WrongPassword"
+        );
 
         when(authService.login(request))
                 .thenReturn(Optional.empty());
@@ -135,28 +135,14 @@ class AuthControllerTest {
     }
 
     @Test
-    void logoutInvalidatesSession() {
-        String result =
-                authController.logout(session);
-
-        verify(session).invalidate();
-
-        assertEquals(
-                "redirect:/auth/login",
-                result
-        );
-    }
-
-    @Test
     void successfulRegistrationRedirectsToLogin() {
-        RegisterRequestDto request =
-                new RegisterRequestDto(
-                        "John",
-                        "Smith",
-                        "johnsmith",
-                        "john@example.com",
-                        "Test1234"
-                );
+        RegisterRequestDto request = new RegisterRequestDto(
+                "John",
+                "Smith",
+                "johnsmith",
+                "john@example.com",
+                "Test1234"
+        );
 
         when(authService.register(request))
                 .thenReturn(true);
@@ -180,14 +166,13 @@ class AuthControllerTest {
 
     @Test
     void failedRegistrationRedirectsBackToRegister() {
-        RegisterRequestDto request =
-                new RegisterRequestDto(
-                        "John",
-                        "Smith",
-                        "johnsmith",
-                        "john@example.com",
-                        "Test1234"
-                );
+        RegisterRequestDto request = new RegisterRequestDto(
+                "John",
+                "Smith",
+                "johnsmith",
+                "john@example.com",
+                "Test1234"
+        );
 
         when(authService.register(request))
                 .thenReturn(false);
@@ -207,5 +192,17 @@ class AuthControllerTest {
                         "error",
                         "An account with that email or username already exists."
                 );
+    }
+
+    @Test
+    void logoutInvalidatesSessionAndRedirectsToLogin() {
+        String result = authController.logout(session);
+
+        verify(session).invalidate();
+
+        assertEquals(
+                "redirect:/auth/login",
+                result
+        );
     }
 }
