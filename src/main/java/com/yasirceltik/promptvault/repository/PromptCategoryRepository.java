@@ -8,4 +8,5 @@ import com.yasirceltik.promptvault.model.PromptCategory;
 
 public interface PromptCategoryRepository extends JpaRepository<PromptCategory, Long> {
 	Optional<PromptCategory> findByName(String name);
+	boolean existsByNameIgnoreCase(String name);
 }

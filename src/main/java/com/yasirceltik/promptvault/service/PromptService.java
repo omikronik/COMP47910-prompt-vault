@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.yasirceltik.promptvault.dto.CreatePromptRequestDto;
 import com.yasirceltik.promptvault.exception.PromptNotFoundException;
+import com.yasirceltik.promptvault.exception.InvalidPromptCategoryException;
 import com.yasirceltik.promptvault.model.PolicyKeyword;
 import com.yasirceltik.promptvault.model.Prompt;
 import com.yasirceltik.promptvault.model.PromptCategory;
@@ -67,13 +68,15 @@ public class PromptService {
 	public void createPrompt(CreatePromptRequestDto dto, User user) {
 		PromptCategory category = null;
 		if (dto.categoryId() != null) {
-			category = promptCategoryRepository.findById(dto.categoryId()).orElse(null);
+			category = promptCategoryRepository.findById(dto.categoryId())
+					.orElseThrow(InvalidPromptCategoryException::new);
 		}
 
 		List<PolicyKeyword> keywords = policyKeywordRepository.findAll();
 		String contentLowercase = dto.content().toLowerCase();
 
 		List<PolicyKeyword> matches = keywords.stream()
+			.filter(kw -> kw.getContent() != null && !kw.getContent().isBlank())
 			.filter(kw -> contentLowercase.contains(kw.getContent().toLowerCase()))
 			.toList();
 
@@ -100,7 +103,7 @@ public class PromptService {
 			promptPolicyMatchRepository.saveAll(ppmList);
 		}
 
-		log.info("created prompt '{}' for user {}", prompt.getTitle(), user.getId());
+		log.info("created prompt id={} for userId={}", prompt.getId(), user.getId());
 	}
 
 	@Transactional
@@ -110,7 +113,8 @@ public class PromptService {
 		PromptCategory category = null;
 
 		if (dto.categoryId() != null) {
-			category = promptCategoryRepository.findById(dto.categoryId()).orElse(null);
+			category = promptCategoryRepository.findById(dto.categoryId())
+					.orElseThrow(InvalidPromptCategoryException::new);
 		}
 
 		List<PolicyKeyword> keywords = policyKeywordRepository.findAll();
@@ -118,6 +122,7 @@ public class PromptService {
 		String contentLowercase = dto.content().toLowerCase();
 
 		List<PolicyKeyword> matches = keywords.stream()
+			.filter(kw -> kw.getContent() != null && !kw.getContent().isBlank())
 			.filter(kw -> contentLowercase.contains(
 						kw.getContent().toLowerCase()
 						)
@@ -147,7 +152,7 @@ public class PromptService {
 			promptPolicyMatchRepository.saveAll(ppmList);
 		}
 
-		log.info("edited prompt '{}' for user {}", prompt.getTitle(), user.getId());
+		log.info("edited prompt id={} for userId={}", prompt.getId(), user.getId());
 	}
 
 	@Transactional

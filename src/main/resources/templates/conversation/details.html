@@ -24,8 +24,7 @@
       <div class="chat-container" id="chat-container">
         <div
           th:if="${#lists.isEmpty(messages)}"
-          class="text-center text-muted"
-          style="padding: 2rem 0"
+          class="text-center text-muted empty-chat"
         >
           <p>No messages yet. Send one below to start.</p>
         </div>
@@ -48,48 +47,24 @@
         <form
           method="post"
           th:action="@{/conversations/{id}/messages(id=${conversation.id})}"
+          th:object="${messageRequest}"
           id="chat-form"
         >
-          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <div class="chat-input-row">
             <textarea
               id="chat-textarea"
-              name="content"
+              th:field="*{content}"
+              maxlength="255"
               placeholder="Type a message…"
               rows="1"
               required
             ></textarea>
             <button id="send-btn" class="btn btn-sm" type="submit">Send</button>
           </div>
+          <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
         </form>
       </div>
 
-      <script>
-        window.scrollTo(0, document.body.scrollHeight);
-
-        const form = document.getElementById("chat-form");
-        const textarea = document.getElementById("chat-textarea");
-        const sendBtn = document.getElementById("send-btn");
-
-        form.addEventListener("submit", function () {
-          textarea.readOnly = true;
-          textarea.style.opacity = "0.5";
-          sendBtn.disabled = true;
-          sendBtn.textContent = "Sending…";
-        });
-
-        textarea.addEventListener("input", function () {
-          this.style.height = "auto";
-          this.style.height = Math.min(this.scrollHeight, 180) + "px";
-        });
-
-        textarea.addEventListener("keydown", function (e) {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            form.requestSubmit();
-          }
-        });
-      </script>
     </div>
   </body>
 </html>

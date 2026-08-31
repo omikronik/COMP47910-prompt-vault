@@ -2,6 +2,7 @@ package com.yasirceltik.promptvault.controller.admin;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import com.yasirceltik.promptvault.service.CategoryService;
 import com.yasirceltik.promptvault.service.SessionService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -46,18 +48,25 @@ public class AdminCategoryController {
 	}
 
 	@GetMapping("/create")
-	public String createCategoryPage(HttpSession session) {
+	public String createCategoryPage(HttpSession session, Model model) {
 		if (!isAdmin(session))
 			return "redirect:/dashboard";
+		model.addAttribute("categoryRequest", new CreateCategoryDto("", ""));
 		return "admin/categories/create";
 	}
 
 	@PostMapping("/create")
-	public String createCategory(HttpSession session, @ModelAttribute CreateCategoryDto dto) {
+	public String createCategory(HttpSession session,
+			@Valid @ModelAttribute("categoryRequest") CreateCategoryDto dto,
+			BindingResult bindingResult) {
 		if (!isAdmin(session))
 			return "redirect:/dashboard";
+		if (bindingResult.hasErrors()) return "admin/categories/create";
 		User user = sessionService.getCurrentUser(session);
-		categoryService.createCategory(dto, user);
+		if (!categoryService.createCategory(dto, user)) {
+			bindingResult.rejectValue("name", "category.duplicate", "That category already exists.");
+			return "admin/categories/create";
+		}
 		return "redirect:/admin/categories";
 	}
 
@@ -66,15 +75,27 @@ public class AdminCategoryController {
 		if (!isAdmin(session))
 			return "redirect:/dashboard";
 		model.addAttribute("category", categoryService.getCategoryById(id).orElseThrow());
+		var category = categoryService.getCategoryById(id).orElseThrow();
+		model.addAttribute("categoryRequest", new CreateCategoryDto(category.getName(), category.getDescription()));
 		return "admin/categories/edit";
 	}
 
 	@PostMapping("/{id}/edit")
-	public String editCategory(@PathVariable Long id, HttpSession session, @ModelAttribute CreateCategoryDto dto) {
+	public String editCategory(@PathVariable Long id, HttpSession session,
+			@Valid @ModelAttribute("categoryRequest") CreateCategoryDto dto,
+			BindingResult bindingResult, Model model) {
 		if (!isAdmin(session))
 			return "redirect:/dashboard";
+		if (bindingResult.hasErrors()) {
+			model.addAttribute("category", categoryService.getCategoryById(id).orElseThrow());
+			return "admin/categories/edit";
+		}
 		User user = sessionService.getCurrentUser(session);
-		categoryService.editCategory(id, dto, user);
+		if (!categoryService.editCategory(id, dto, user)) {
+			bindingResult.rejectValue("name", "category.duplicate", "That category already exists.");
+			model.addAttribute("category", categoryService.getCategoryById(id).orElseThrow());
+			return "admin/categories/edit";
+		}
 		return "redirect:/admin/categories";
 	}
 

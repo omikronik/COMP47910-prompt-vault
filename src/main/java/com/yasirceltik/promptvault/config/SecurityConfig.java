@@ -13,6 +13,18 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+    public static final String CONTENT_SECURITY_POLICY =
+            "default-src 'self'; "
+            + "script-src 'self'; "
+            + "style-src 'self'; "
+            + "img-src 'self' data:; "
+            + "font-src 'self'; "
+            + "connect-src 'self'; "
+            + "object-src 'none'; "
+            + "base-uri 'self'; "
+            + "form-action 'self'; "
+            + "frame-ancestors 'none'";
+
     private final LoginRateLimitFilter loginRateLimitFilter;
 
     @Bean
@@ -26,6 +38,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .anyRequest().permitAll()
                     )
+            .headers(headers -> headers
+                    .frameOptions(frame -> frame.deny())
+                    .contentSecurityPolicy(csp -> csp
+                            .policyDirectives(CONTENT_SECURITY_POLICY)))
             .addFilterBefore(
                     loginRateLimitFilter,
                     UsernamePasswordAuthenticationFilter.class

@@ -30,21 +30,32 @@ public class PolicyKeywordService {
 	}
 
 	@Transactional
-	public void createKeyword(CreatePolicyKeywordDto dto, User user) {
+	public boolean createKeyword(CreatePolicyKeywordDto dto, User user) {
+		String normalized = dto.content().trim().toLowerCase(java.util.Locale.ROOT);
+		if (policyKeywordRepository.existsByContentIgnoreCase(normalized)) {
+			return false;
+		}
 		PolicyKeyword keyword = PolicyKeyword.builder()
-				.content(dto.content())
+				.content(normalized)
 				.createdBy(user)
 				.build();
 		policyKeywordRepository.save(keyword);
-		log.info("created policy keyword '{}'", keyword.getContent());
+		log.info("created policy keyword id={}", keyword.getId());
+		return true;
 	}
 
 	@Transactional
-	public void editKeyword(Long id, CreatePolicyKeywordDto dto, User user) {
+	public boolean editKeyword(Long id, CreatePolicyKeywordDto dto, User user) {
 		PolicyKeyword keyword = policyKeywordRepository.findById(id).orElseThrow();
-		keyword.setContent(dto.content());
+		String normalized = dto.content().trim().toLowerCase(java.util.Locale.ROOT);
+		Optional<PolicyKeyword> duplicate = policyKeywordRepository.findByContent(normalized);
+		if (duplicate.isPresent() && duplicate.get().getId() != keyword.getId()) {
+			return false;
+		}
+		keyword.setContent(normalized);
 		keyword.setUpdatedBy(user);
-		log.info("edited policy keyword '{}'", keyword.getContent());
+		log.info("edited policy keyword id={} by userId={}", keyword.getId(), user.getId());
+		return true;
 	}
 
 	@Transactional

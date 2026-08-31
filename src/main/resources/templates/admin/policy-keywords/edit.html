@@ -23,18 +23,18 @@
         <form
           method="post"
           th:action="@{/admin/policy-keywords/{id}/edit(id=${keyword.id})}"
+          th:object="${keywordRequest}"
         >
-          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <div class="form-group">
             <label for="content">Keyword</label>
             <input
               type="text"
               id="content"
-              name="content"
+              th:field="*{content}"
               maxlength="255"
               required
-              th:value="${keyword.content}"
             />
+            <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
           </div>
           <input type="submit" value="Save Changes" />
         </form>

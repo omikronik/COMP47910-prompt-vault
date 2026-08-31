@@ -27,7 +27,7 @@ public class PromptCategory {
 	@Column(nullable = false, unique = true, length = 255)
 	private String name;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 255)
 	private String description;
 
 	@CreationTimestamp

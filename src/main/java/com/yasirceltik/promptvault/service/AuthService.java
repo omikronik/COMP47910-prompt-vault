@@ -32,18 +32,20 @@ public class AuthService {
 
 	@Transactional
 	public boolean register(RegisterRequestDto request) {
-		if (userRepository.findByEmail(request.email()).isPresent()) {
+		String email = request.email().trim().toLowerCase(java.util.Locale.ROOT);
+		String username = request.username().trim();
+		if (userRepository.findByEmail(email).isPresent()) {
 			return false;
 		}
-		if (userRepository.findByUsername(request.username()).isPresent()) {
+		if (userRepository.findByUsername(username).isPresent()) {
 			return false;
 		}
 
 		User user = User.builder()
-				.firstName(request.firstName())
-				.lastName(request.lastName())
-				.username(request.username())
-				.email(request.email())
+				.firstName(request.firstName().trim())
+				.lastName(request.lastName().trim())
+				.username(username)
+				.email(email)
 				.password(passwordEncoder.encode(request.password()))
 				.role(UserRole.USER)
 				.active(true)
@@ -59,7 +61,7 @@ public class AuthService {
 
 		Optional<User> optionalUser =
 				userRepository.findByEmail(
-					request.email()
+					request.email().trim().toLowerCase(java.util.Locale.ROOT)
 				);
 
 		if (optionalUser.isEmpty()) {

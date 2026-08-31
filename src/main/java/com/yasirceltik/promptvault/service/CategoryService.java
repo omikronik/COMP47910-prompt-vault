@@ -32,23 +32,34 @@ public class CategoryService {
 	}
 
 	@Transactional
-	public void createCategory(CreateCategoryDto dto, User user) {
+	public boolean createCategory(CreateCategoryDto dto, User user) {
+		String name = dto.name().trim();
+		if (promptCategoryRepository.existsByNameIgnoreCase(name)) {
+			return false;
+		}
 		PromptCategory category = PromptCategory.builder()
-				.name(dto.name())
-				.description(dto.description())
+				.name(name)
+				.description(dto.description().trim())
 				.createdBy(user)
 				.build();
 		promptCategoryRepository.save(category);
-		log.info("created category '{}'", category.getName());
+		log.info("created category id={}", category.getId());
+		return true;
 	}
 
 	@Transactional
-	public void editCategory(Long id, CreateCategoryDto dto, User user) {
+	public boolean editCategory(Long id, CreateCategoryDto dto, User user) {
 		PromptCategory category = promptCategoryRepository.findById(id).orElseThrow();
-		category.setName(dto.name());
-		category.setDescription(dto.description());
+		String name = dto.name().trim();
+		Optional<PromptCategory> duplicate = promptCategoryRepository.findByName(name);
+		if (duplicate.isPresent() && duplicate.get().getId() != category.getId()) {
+			return false;
+		}
+		category.setName(name);
+		category.setDescription(dto.description().trim());
 		category.setUpdatedBy(user);
-		log.info("edited category '{}'", category.getName());
+		log.info("edited category id={} by userId={}", category.getId(), user.getId());
+		return true;
 	}
 
 	@Transactional

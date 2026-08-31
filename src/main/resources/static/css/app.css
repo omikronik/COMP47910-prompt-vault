@@ -916,3 +916,33 @@ tbody tr:hover {
 .error-actions .btn {
   width: 100%;
 }
+
+/* =========================================
+   CSP-safe presentation helpers
+   ========================================= */
+
+.auth-title { margin-bottom: 0.25rem; }
+.auth-subtitle { margin-bottom: 1.5rem; }
+.small-copy { font-size: 0.9rem; }
+.form-help { font-size: 0.8rem; margin-top: 0.35rem; }
+.char-counter { font-size: 0.8rem; }
+.centered-actions { justify-content: center; }
+.conversation-meta { margin-top: 0.25rem; flex-wrap: wrap; gap: 0.5rem; }
+.timestamp { font-size: 0.82rem; }
+.conversation-preview {
+  margin-top: var(--space);
+  padding-top: var(--space);
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.preview-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.empty-chat { padding: 2rem 0; }
+.flagged-message-list { margin-left: 1.5rem; }
+.is-submitting { opacity: 0.5; }

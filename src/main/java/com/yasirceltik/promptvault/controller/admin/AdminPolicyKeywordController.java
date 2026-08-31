@@ -2,6 +2,7 @@ package com.yasirceltik.promptvault.controller.admin;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import com.yasirceltik.promptvault.service.PolicyKeywordService;
 import com.yasirceltik.promptvault.service.SessionService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -46,18 +48,25 @@ public class AdminPolicyKeywordController {
 	}
 
 	@GetMapping("/create")
-	public String createKeywordPage(HttpSession session) {
+	public String createKeywordPage(HttpSession session, Model model) {
 		if (!isAdmin(session))
 			return "redirect:/dashboard";
+		model.addAttribute("keywordRequest", new CreatePolicyKeywordDto(""));
 		return "admin/policy-keywords/create";
 	}
 
 	@PostMapping("/create")
-	public String createKeyword(HttpSession session, @ModelAttribute CreatePolicyKeywordDto dto) {
+	public String createKeyword(HttpSession session,
+			@Valid @ModelAttribute("keywordRequest") CreatePolicyKeywordDto dto,
+			BindingResult bindingResult) {
 		if (!isAdmin(session))
 			return "redirect:/dashboard";
+		if (bindingResult.hasErrors()) return "admin/policy-keywords/create";
 		User user = sessionService.getCurrentUser(session);
-		policyKeywordService.createKeyword(dto, user);
+		if (!policyKeywordService.createKeyword(dto, user)) {
+			bindingResult.rejectValue("content", "keyword.duplicate", "That keyword already exists.");
+			return "admin/policy-keywords/create";
+		}
 		return "redirect:/admin/policy-keywords";
 	}
 
@@ -66,15 +75,27 @@ public class AdminPolicyKeywordController {
 		if (!isAdmin(session))
 			return "redirect:/dashboard";
 		model.addAttribute("keyword", policyKeywordService.getKeywordById(id).orElseThrow());
+		model.addAttribute("keywordRequest", new CreatePolicyKeywordDto(
+				policyKeywordService.getKeywordById(id).orElseThrow().getContent()));
 		return "admin/policy-keywords/edit";
 	}
 
 	@PostMapping("/{id}/edit")
-	public String editKeyword(@PathVariable Long id, HttpSession session, @ModelAttribute CreatePolicyKeywordDto dto) {
+	public String editKeyword(@PathVariable Long id, HttpSession session,
+			@Valid @ModelAttribute("keywordRequest") CreatePolicyKeywordDto dto,
+			BindingResult bindingResult, Model model) {
 		if (!isAdmin(session))
 			return "redirect:/dashboard";
+		if (bindingResult.hasErrors()) {
+			model.addAttribute("keyword", policyKeywordService.getKeywordById(id).orElseThrow());
+			return "admin/policy-keywords/edit";
+		}
 		User user = sessionService.getCurrentUser(session);
-		policyKeywordService.editKeyword(id, dto, user);
+		if (!policyKeywordService.editKeyword(id, dto, user)) {
+			bindingResult.rejectValue("content", "keyword.duplicate", "That keyword already exists.");
+			model.addAttribute("keyword", policyKeywordService.getKeywordById(id).orElseThrow());
+			return "admin/policy-keywords/edit";
+		}
 		return "redirect:/admin/policy-keywords";
 	}
 

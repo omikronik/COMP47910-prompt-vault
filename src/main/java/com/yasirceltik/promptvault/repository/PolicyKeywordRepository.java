@@ -8,4 +8,5 @@ import com.yasirceltik.promptvault.model.PolicyKeyword;
 
 public interface PolicyKeywordRepository extends JpaRepository<PolicyKeyword, Long> {
 	Optional<PolicyKeyword> findByContent(String content);
+	boolean existsByContentIgnoreCase(String content);
 }

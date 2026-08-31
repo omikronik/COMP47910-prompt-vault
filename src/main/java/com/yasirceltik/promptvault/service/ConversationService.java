@@ -80,7 +80,7 @@ public class ConversationService {
 
 		Conversation saved = conversationRepository.save(conversation);
 
-		log.info("created conversation '{}' for user {}", saved.getTitle(), user.getId());
+		log.info("created conversation id={} for userId={}", saved.getId(), user.getId());
 
 		return saved;
 	}
@@ -92,6 +92,7 @@ public class ConversationService {
 		List<PolicyKeyword> keywords = policyKeywordRepository.findAll();
 		String contentLower = content.toLowerCase();
 		List<PolicyKeyword> matches = keywords.stream()
+				.filter(kw -> kw.getContent() != null && !kw.getContent().isBlank())
 				.filter(kw -> contentLower.contains(kw.getContent().toLowerCase()))
 				.toList();
 

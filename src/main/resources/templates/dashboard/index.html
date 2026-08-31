@@ -25,8 +25,7 @@
         <h2>No conversations yet</h2>
         <p>Use a prompt or start a new conversation to get going.</p>
         <div
-          class="row"
-          style="justify-content: center; margin-top: var(--space)"
+          class="row centered-actions mt"
         >
           <a class="btn btn-secondary" th:href="@{/prompts}">My Prompts</a>
           <form method="post" th:action="@{/conversations/start}">
@@ -42,8 +41,7 @@
             <div>
               <h2 th:text="${conv.title}">Conversation title</h2>
               <div
-                class="row"
-                style="margin-top: 0.25rem; flex-wrap: wrap; gap: 0.5rem"
+                class="row conversation-meta"
               >
                 <span
                   th:if="${conv.prompt != null}"
@@ -55,8 +53,7 @@
                   >No prompt</span
                 >
                 <span
-                  class="text-muted"
-                  style="font-size: 0.82rem"
+                  class="text-muted timestamp"
                   th:text="${#temporals.format(conv.createdOn, 'dd MMM yyyy HH:mm')}"
                   >date</span
                 >
@@ -74,23 +71,10 @@
           >
             <div
               th:if="${!aiMessages.isEmpty()}"
-              class="text-muted"
-              style="
-                margin-top: var(--space);
-                font-size: 0.88rem;
-                border-top: 1px solid var(--border);
-                padding-top: var(--space);
-              "
+              class="text-muted conversation-preview"
             >
               <span
-                style="
-                  font-size: 0.72rem;
-                  text-transform: uppercase;
-                  letter-spacing: 0.06em;
-                  color: var(--text-muted);
-                  display: block;
-                  margin-bottom: 0.25rem;
-                "
+                class="preview-label"
                 >Last AI response</span
               >
               <span th:text="${aiMessages[aiMessages.size()-1].content}"
@@ -99,13 +83,7 @@
             </div>
             <div
               th:if="${aiMessages.isEmpty()}"
-              class="text-muted"
-              style="
-                margin-top: var(--space);
-                font-size: 0.88rem;
-                border-top: 1px solid var(--border);
-                padding-top: var(--space);
-              "
+              class="text-muted conversation-preview"
             >
               No messages yet.
             </div>

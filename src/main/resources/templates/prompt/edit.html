@@ -25,34 +25,32 @@
       </div>
 
       <div class="card">
-        <form method="post" th:action="@{/prompts/{id}/edit(id=${prompt.id})}">
-          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <form method="post" th:action="@{/prompts/{id}/edit(id=${prompt.id})}" th:object="${promptRequest}">
           <div class="form-group">
             <label for="title">Title</label>
             <input
               type="text"
               id="title"
-              name="title"
+              th:field="*{title}"
               maxlength="255"
               required
-              th:value="${prompt.title}"
             />
+            <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
           </div>
 
           <div class="form-group">
             <label for="content">Content</label>
             <textarea
               id="content"
-              name="content"
+              th:field="*{content}"
               maxlength="255"
               required
-              oninput="updateCounter(this, 'content-count')"
-              th:text="${prompt.content}"
+              data-character-counter="content-count"
             ></textarea>
+            <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
             <span
               id="content-count"
-              class="text-muted"
-              style="font-size: 0.8rem"
+              class="text-muted char-counter"
               th:text="${255 - #strings.length(prompt.content)} + ' remaining'"
             >
               255 remaining
@@ -60,14 +58,13 @@
           </div>
 
           <div class="form-group">
-            <label for="category">Category</label>
-            <select id="category" name="category">
+            <label for="categoryId">Category</label>
+            <select id="categoryId" th:field="*{categoryId}">
               <option value="">-- None --</option>
               <option
                 th:each="cat : ${categories}"
                 th:value="${cat.id}"
                 th:text="${cat.name}"
-                th:selected="${prompt.category != null and prompt.category.id == cat.id}"
               >
                 Category
               </option>
@@ -76,20 +73,19 @@
 
           <div class="form-group">
             <label for="visibility">Visibility</label>
-            <select id="visibility" name="visibility">
+            <select id="visibility" th:field="*{visibility}">
               <option
                 value="PRIVATE"
-                th:selected="${prompt.visibility.name() == 'PRIVATE'}"
               >
                 Private
               </option>
               <option
                 value="SHARED"
-                th:selected="${prompt.visibility.name() == 'SHARED'}"
               >
                 Shared
               </option>
             </select>
+            <div class="text-danger" th:if="${#fields.hasErrors('visibility')}" th:errors="*{visibility}"></div>
           </div>
 
           <div class="row actions mt-lg">
@@ -106,12 +102,5 @@
       </div>
     </div>
 
-    <script>
-      function updateCounter(input, counterId) {
-        const remaining = input.maxLength - input.value.length;
-        document.getElementById(counterId).textContent =
-          remaining + " remaining";
-      }
-    </script>
   </body>
 </html>

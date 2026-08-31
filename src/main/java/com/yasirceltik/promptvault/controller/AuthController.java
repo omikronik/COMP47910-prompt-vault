@@ -32,14 +32,19 @@ public class AuthController {
 	private final SessionRegistryService sessionRegistryService;
 
 	@GetMapping("/login")
-	public String loginPage() {
+	public String loginPage(Model model) {
+		model.addAttribute("loginRequest", new LoginRequestDto("", ""));
 		return "auth/login";
 	}
 
 	@PostMapping("/login")
-	public String login(@ModelAttribute LoginRequestDto loginRequest,
+	public String login(@Valid @ModelAttribute("loginRequest") LoginRequestDto loginRequest,
+			BindingResult bindingResult,
 			HttpSession session,
 			RedirectAttributes redirectAttributes) {
+		if (bindingResult.hasErrors()) {
+			return "auth/login";
+		}
 		LoginResultDto loginResult = authService.login(loginRequest);
 
 		if (loginResult.status() == LoginStatus.LOCKED) {

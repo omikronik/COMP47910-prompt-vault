@@ -49,7 +49,7 @@ class AuthControllerTest {
         void loginPageReturnsLoginTemplate() {
                 assertEquals(
                                 "auth/login",
-                                authController.loginPage()
+                                authController.loginPage(model)
                             );
         }
 
@@ -87,6 +87,7 @@ class AuthControllerTest {
 
                 String result = authController.login(
                                 request,
+                                bindingResult,
                                 session,
                                 redirectAttributes
                                 );
@@ -125,6 +126,7 @@ class AuthControllerTest {
 
                 String result = authController.login(
                                 request,
+                                bindingResult,
                                 session,
                                 redirectAttributes
                                 );
@@ -163,6 +165,7 @@ class AuthControllerTest {
 
                 String result = authController.login(
                                 request,
+                                bindingResult,
                                 session,
                                 redirectAttributes
                                 );

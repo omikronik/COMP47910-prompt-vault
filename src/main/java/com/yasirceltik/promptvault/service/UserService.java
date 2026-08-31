@@ -37,6 +37,6 @@ public class UserService {
 			sessionRegistryService.expireSessionsForUser(id);
 		}
 
-		log.info("set user {} active={}", user.getEmail(), active);
+		log.info("set userId={} active={}", user.getId(), active);
 	}
 }

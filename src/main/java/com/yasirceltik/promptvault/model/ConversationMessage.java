@@ -26,7 +26,7 @@ public class ConversationMessage {
 	@JoinColumn(name = "conversation_id")
 	private Conversation conversation;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 255)
 	private String content;
 
 	private Boolean policyFlagged;

@@ -22,17 +22,17 @@
       </div>
 
       <div class="card">
-        <form method="post" th:action="@{/admin/policy-keywords/create}">
-          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <form method="post" th:action="@{/admin/policy-keywords/create}" th:object="${keywordRequest}">
           <div class="form-group">
             <label for="content">Keyword</label>
             <input
               type="text"
               id="content"
-              name="content"
+              th:field="*{content}"
               maxlength="255"
               required
             />
+            <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
           </div>
           <input type="submit" value="Add Keyword" />
         </form>

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")"
+
+if [ -f .env ]; then
+  set -a
+  source .env
+  set +a
+fi
+
+case "$1" in
+  run)
+    profile="${2:-dev}"
+    ./mvnw spring-boot:run \
+      "-Dspring-boot.run.arguments=--spring.profiles.active=$profile"
+    ;;
+  clean)
+    ./mvnw clean
+    ;;
+  test)
+    ./mvnw test
+    ;;
+  *)
+    echo "Usage: pv {run [dev|prod]|clean|test}"
+    ;;
+esac
