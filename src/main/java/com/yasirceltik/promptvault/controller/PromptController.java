@@ -28,9 +28,6 @@ public class PromptController {
 
 	@GetMapping
 	public String listPrompts(HttpSession session, Model model) {
-		if (!sessionService.isLoggedIn(session)) {
-			return "redirect:/auth/login";
-		}
 		User user = sessionService.getCurrentUser(session);
 		model.addAttribute("prompts", promptService.getPromptsForUser(user));
 		return "prompt/list";
@@ -38,18 +35,12 @@ public class PromptController {
 
 	@GetMapping("/create")
 	public String createPromptPage(HttpSession session, Model model) {
-		if (!sessionService.isLoggedIn(session)) {
-			return "redirect:/auth/login";
-		}
 		model.addAttribute("categories", promptService.getAllCategories());
 		return "prompt/create";
 	}
 
 	@PostMapping("/create")
 	public String createPrompt(HttpSession session, @ModelAttribute CreatePromptRequestDto dto) {
-		if (!sessionService.isLoggedIn(session)) {
-			return "redirect:/auth/login";
-		}
 		User user = sessionService.getCurrentUser(session);
 		promptService.createPrompt(dto, user);
 		return "redirect:/prompts";
@@ -62,11 +53,8 @@ public class PromptController {
 
 	@GetMapping("/{id}/edit")
 	public String editPromptPage(@PathVariable long id, Model model, HttpSession session) {
-		if (!sessionService.isLoggedIn(session)) {
-			return "redirect:/auth/login";
-		}
-
-		Prompt prompt = promptService.getPromptById(id).orElseThrow();
+		User user = sessionService.getCurrentUser(session);
+		Prompt prompt = promptService.getPromptByIdAndOwner(id, user);
 
 		model.addAttribute("prompt", prompt);
 		model.addAttribute("categories", promptService.getAllCategories());
@@ -75,10 +63,6 @@ public class PromptController {
 
 	@PostMapping("/{id}/edit")
 	public String editPrompt(@PathVariable long id, HttpSession session, @ModelAttribute CreatePromptRequestDto dto) {
-		if (!sessionService.isLoggedIn(session)) {
-			return "redirect:/auth/login";
-		}
-
 		User user = sessionService.getCurrentUser(session);
 
 		promptService.editPrompt(id, dto, user);
@@ -87,10 +71,6 @@ public class PromptController {
 
 	@PostMapping("/{id}/delete")
 	public String deletePrompt(@PathVariable Long id, HttpSession session) {
-		if (!sessionService.isLoggedIn(session)) {
-			return "redirect:/auth/login";
-		}
-
 		User user = sessionService.getCurrentUser(session);
 
 		promptService.deletePrompt(id, user);

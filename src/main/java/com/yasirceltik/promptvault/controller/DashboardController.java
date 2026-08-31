@@ -21,9 +21,6 @@ public class DashboardController {
 
 	@GetMapping
 	public String dashboard(HttpSession session, Model model) {
-		if (!sessionService.isLoggedIn(session)) {
-			return "redirect:/auth/login";
-		}
 		User user = sessionService.getCurrentUser(session);
 		model.addAttribute("conversations", conversationService.getConversationsForUser(user));
 		return "dashboard/index";

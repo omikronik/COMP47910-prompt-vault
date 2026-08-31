@@ -16,14 +16,10 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/prompts/shared")
 @RequiredArgsConstructor
 public class SharedPromptController {
-	private final SessionService sessionService;
 	private final PromptService promptService;
 
 	@GetMapping
 	public String browseSharedPrompts(HttpSession session, Model model) {
-		if (!sessionService.isLoggedIn(session)) {
-			return "redirect:/auth/login";
-		}
 		model.addAttribute("prompts", promptService.getSharedPrompts());
 		return "prompt/shared";
 	}

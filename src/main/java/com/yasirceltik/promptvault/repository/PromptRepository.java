@@ -19,6 +19,8 @@ public interface PromptRepository extends JpaRepository<Prompt, Long> {
 
 	List<Prompt> findAllByVisibility(PromptVisibility visibility);
 
+	Optional<Prompt> findByIdAndOwner(Long id, User owner);
+
 	@Modifying
 	@Query("UPDATE Prompt p SET p.category = null WHERE p.category.id = :categoryId")
 	void nullifyCategoryReferences(@Param("categoryId") Long categoryId);

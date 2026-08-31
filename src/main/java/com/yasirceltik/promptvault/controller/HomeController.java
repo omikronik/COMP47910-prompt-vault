@@ -16,7 +16,7 @@ public class HomeController {
 	@GetMapping("/")
 	public String home(HttpSession session) {
 		if (sessionService.isLoggedIn(session)) {
-			return "redirect:/dashboard/index";
+			return "redirect:/dashboard";
 		}
 
 		return "redirect:/auth/login";

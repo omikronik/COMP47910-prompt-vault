@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yasirceltik.promptvault.dto.CreatePromptRequestDto;
+import com.yasirceltik.promptvault.exception.PromptNotFoundException;
 import com.yasirceltik.promptvault.model.PolicyKeyword;
 import com.yasirceltik.promptvault.model.Prompt;
 import com.yasirceltik.promptvault.model.PromptCategory;
@@ -45,8 +46,13 @@ public class PromptService {
 		return promptCategoryRepository.findAll();
 	}
 
+	@Deprecated
 	public Optional<Prompt> getPromptById(Long id) {
 		return promptRepository.findById(id);
+	}
+
+	public Prompt getPromptByIdAndOwner(Long id, User user) {
+		return promptRepository.findByIdAndOwner(id, user).orElseThrow(PromptNotFoundException::new);
 	}
 
 	public List<Prompt> getSharedPrompts() {
@@ -99,19 +105,25 @@ public class PromptService {
 
 	@Transactional
 	public void editPrompt(Long id, CreatePromptRequestDto dto, User user) {
+		Prompt prompt = getPromptByIdAndOwner(id, user);
+
 		PromptCategory category = null;
+
 		if (dto.categoryId() != null) {
 			category = promptCategoryRepository.findById(dto.categoryId()).orElse(null);
 		}
 
 		List<PolicyKeyword> keywords = policyKeywordRepository.findAll();
+
 		String contentLowercase = dto.content().toLowerCase();
 
 		List<PolicyKeyword> matches = keywords.stream()
-				.filter(kw -> contentLowercase.contains(kw.getContent().toLowerCase()))
-				.toList();
+			.filter(kw -> contentLowercase.contains(
+						kw.getContent().toLowerCase()
+						)
+				   )
+			.toList();
 
-		Prompt prompt = promptRepository.findById(id).orElseThrow();
 		prompt.setTitle(dto.title());
 		prompt.setContent(dto.content());
 		prompt.setVisibility(dto.visibility());
@@ -119,14 +131,19 @@ public class PromptService {
 		prompt.setPolicyFlagged(!matches.isEmpty());
 
 		promptPolicyMatchRepository.deleteByPrompt(prompt);
+
 		if (!matches.isEmpty()) {
 			List<PromptPolicyMatch> ppmList = new ArrayList<>();
+
 			for (PolicyKeyword match : matches) {
-				ppmList.add(PromptPolicyMatch.builder()
+				ppmList.add(
+						PromptPolicyMatch.builder()
 						.prompt(prompt)
 						.policy(match)
-						.build());
+						.build()
+						);
 			}
+
 			promptPolicyMatchRepository.saveAll(ppmList);
 		}
 
@@ -135,7 +152,12 @@ public class PromptService {
 
 	@Transactional
 	public void deletePrompt(long id, User user) {
-		Prompt prompt = getPromptById(id).orElseThrow();
+		Prompt prompt;
+		if (user.getRole() == UserRole.ADMIN) {
+			prompt = getPromptById(id).orElseThrow(PromptNotFoundException::new);
+		} else {
+			prompt = getPromptByIdAndOwner(id, user);
+		}
 
 		boolean isOwner = prompt.getOwner().getId() == user.getId();
 		boolean isAdmin = user.getRole() == UserRole.ADMIN;
