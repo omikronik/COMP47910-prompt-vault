@@ -10,6 +10,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yasirceltik.promptvault.dto.LoginRequestDto;
@@ -24,187 +26,265 @@ import jakarta.servlet.http.HttpSession;
 
 class AuthControllerTest {
 
-    private AuthService authService;
-	private SessionRegistryService sessionRegistryService;
-    private AuthController authController;
-    private HttpSession session;
-    private RedirectAttributes redirectAttributes;
+        private AuthService authService;
+        private SessionRegistryService sessionRegistryService;
+        private AuthController authController;
+        private HttpSession session;
+        private Model model;
+        private BindingResult bindingResult;
+        private RedirectAttributes redirectAttributes;
 
-    @BeforeEach
-    void setUp() {
-        authService = mock(AuthService.class);
-        session = mock(HttpSession.class);
-        redirectAttributes = mock(RedirectAttributes.class);
+        @BeforeEach
+        void setUp() {
+                authService = mock(AuthService.class);
+                sessionRegistryService = mock(SessionRegistryService.class);
+                session = mock(HttpSession.class);
+                model = mock(Model.class);
+                bindingResult = mock(BindingResult.class);
+                redirectAttributes = mock(RedirectAttributes.class);
 
-        authController = new AuthController(authService, sessionRegistryService);
-    }
+                authController = new AuthController(authService, sessionRegistryService);
+        }
 
-    @Test
-    void loginPageReturnsLoginTemplate() {
-        assertEquals(
-                "auth/login",
-                authController.loginPage()
-        );
-    }
+        @Test
+        void loginPageReturnsLoginTemplate() {
+                assertEquals(
+                                "auth/login",
+                                authController.loginPage()
+                            );
+        }
 
-    @Test
-    void registerPageReturnsRegisterTemplate() {
-        assertEquals(
-                "auth/register",
-                authController.registerPage()
-        );
-    }
+        @Test
+        void registerPageReturnsRegisterTemplate() {
+                assertEquals(
+                                "auth/register",
+                                authController.registerPage(model)
+                            );
 
-    @Test
-    void successfulLoginStoresPrincipalAndRedirectsToDashboard() {
-        LoginRequestDto request = new LoginRequestDto(
-                "john@example.com",
-                "Test1234"
-        );
+                verify(model).addAttribute(
+                                eq("registerRequest"),
+                                any(RegisterRequestDto.class)
+                                );
+        }
 
-        User user = User.builder()
-                .id(1L)
-                .username("johnsmith")
-                .email("john@example.com")
-                .password("$2a$10$someHash")
-                .role(UserRole.USER)
-                .active(true)
-                .build();
+        @Test
+        void successfulLoginStoresPrincipalAndRedirectsToDashboard() {
+                LoginRequestDto request = new LoginRequestDto(
+                                "john@example.com",
+                                "Test1234"
+                                );
 
-        when(authService.login(request))
-                .thenReturn(Optional.of(user));
+                User user = User.builder()
+                        .id(1L)
+                        .username("johnsmith")
+                        .email("john@example.com")
+                        .password("$2a$10$someHash")
+                        .role(UserRole.USER)
+                        .active(true)
+                        .build();
 
-        String result = authController.login(
-                request,
-                session,
-                redirectAttributes
-        );
+                when(authService.login(request))
+                        .thenReturn(Optional.of(user));
 
-        assertEquals(
-                "redirect:/dashboard",
-                result
-        );
+                String result = authController.login(
+                                request,
+                                session,
+                                redirectAttributes
+                                );
 
-        ArgumentCaptor<Object> captor =
-                ArgumentCaptor.forClass(Object.class);
+                assertEquals(
+                                "redirect:/dashboard",
+                                result
+                            );
 
-        verify(session).setAttribute(
-                eq("user"),
-                captor.capture()
-        );
+                ArgumentCaptor<Object> captor =
+                        ArgumentCaptor.forClass(Object.class);
 
-        SessionUserDto principal =
-                (SessionUserDto) captor.getValue();
+                verify(session).setAttribute(
+                                eq("user"),
+                                captor.capture()
+                                );
 
-        assertEquals(1L, principal.id());
-        assertEquals("johnsmith", principal.username());
-        assertEquals("john@example.com", principal.email());
-        assertEquals(UserRole.USER, principal.role());
-    }
+                SessionUserDto principal =
+                        (SessionUserDto) captor.getValue();
 
-    @Test
-    void failedLoginRedirectsToLoginAndDoesNotCreatePrincipal() {
-        LoginRequestDto request = new LoginRequestDto(
-                "john@example.com",
-                "WrongPassword"
-        );
+                assertEquals(1L, principal.id());
+                assertEquals("johnsmith", principal.username());
+                assertEquals("john@example.com", principal.email());
+                assertEquals(UserRole.USER, principal.role());
+        }
 
-        when(authService.login(request))
-                .thenReturn(Optional.empty());
+        @Test
+        void failedLoginRedirectsToLoginAndDoesNotCreatePrincipal() {
+                LoginRequestDto request = new LoginRequestDto(
+                                "john@example.com",
+                                "WrongPassword"
+                                );
 
-        String result = authController.login(
-                request,
-                session,
-                redirectAttributes
-        );
+                when(authService.login(request))
+                        .thenReturn(Optional.empty());
 
-        assertEquals(
-                "redirect:/auth/login",
-                result
-        );
+                String result = authController.login(
+                                request,
+                                session,
+                                redirectAttributes
+                                );
 
-        verify(session, never())
-                .setAttribute(
-                        eq("user"),
-                        any()
-                );
+                assertEquals(
+                                "redirect:/auth/login",
+                                result
+                            );
 
-        verify(redirectAttributes)
-                .addFlashAttribute(
-                        "error",
-                        "Invalid email or password."
-                );
-    }
+                verify(session, never())
+                        .setAttribute(
+                                        eq("user"),
+                                        any()
+                                     );
 
-    @Test
-    void successfulRegistrationRedirectsToLogin() {
-        RegisterRequestDto request = new RegisterRequestDto(
-                "John",
-                "Smith",
-                "johnsmith",
-                "john@example.com",
-                "Test1234"
-        );
+                verify(redirectAttributes)
+                        .addFlashAttribute(
+                                        "error",
+                                        "Invalid email or password."
+                                        );
+        }
 
-        when(authService.register(request))
-                .thenReturn(true);
+        @Test
+        void successfulRegistrationRedirectsToLogin() {
+                RegisterRequestDto request = new RegisterRequestDto(
+                                "John",
+                                "Smith",
+                                "johnsmith",
+                                "john@example.com",
+                                "Test1234"
+                                );
 
-        String result = authController.register(
-                request,
-                redirectAttributes
-        );
+                when(authService.register(request))
+                        .thenReturn(true);
 
-        assertEquals(
-                "redirect:/auth/login",
-                result
-        );
+                String result = authController.register(
+                                request,
+                                bindingResult,
+                                redirectAttributes
+                                );
 
-        verify(redirectAttributes)
-                .addFlashAttribute(
-                        "success",
-                        "Account created. You can now sign in."
-                );
-    }
+                assertEquals(
+                                "redirect:/auth/login",
+                                result
+                            );
 
-    @Test
-    void failedRegistrationRedirectsBackToRegister() {
-        RegisterRequestDto request = new RegisterRequestDto(
-                "John",
-                "Smith",
-                "johnsmith",
-                "john@example.com",
-                "Test1234"
-        );
+                verify(redirectAttributes)
+                        .addFlashAttribute(
+                                        "success",
+                                        "Account created. You can now sign in."
+                                        );
+        }
 
-        when(authService.register(request))
-                .thenReturn(false);
+        @Test
+        void failedRegistrationRedirectsBackToRegister() {
+                RegisterRequestDto request = new RegisterRequestDto(
+                                "John",
+                                "Smith",
+                                "johnsmith",
+                                "john@example.com",
+                                "Test1234"
+                                );
 
-        String result = authController.register(
-                request,
-                redirectAttributes
-        );
+                when(authService.register(request))
+                        .thenReturn(false);
 
-        assertEquals(
-                "redirect:/auth/register",
-                result
-        );
+                String result = authController.register(
+                                request,
+                                bindingResult,
+                                redirectAttributes
+                                );
 
-        verify(redirectAttributes)
-                .addFlashAttribute(
-                        "error",
-                        "An account with that email or username already exists."
-                );
-    }
+                assertEquals(
+                                "auth/register",
+                                result
+                            );
 
-    @Test
-    void logoutInvalidatesSessionAndRedirectsToLogin() {
-        String result = authController.logout(session);
+                verify(bindingResult)
+                        .reject(
+                                        "account.exists",
+                                        "An account with that email or username already exists."
+                               );
+        }
 
-        verify(session).invalidate();
+        @Test
+        void logoutInvalidatesSessionAndRedirectsToLogin() {
+                String result = authController.logout(session);
 
-        assertEquals(
-                "redirect:/auth/login",
-                result
-        );
-    }
+                verify(session).invalidate();
+
+                assertEquals(
+                                "redirect:/auth/login",
+                                result
+                            );
+        }
+        @Test
+        void registrationWithValidationErrorsDoesNotCallAuthService() {
+                RegisterRequestDto request =
+                        new RegisterRequestDto(
+                                        "John",
+                                        "Smith",
+                                        "johnsmith",
+                                        "john@example.com",
+                                        "weak"
+                                        );
+
+                BindingResult bindingResult =
+                        mock(BindingResult.class);
+
+                when(bindingResult.hasErrors())
+                        .thenReturn(true);
+
+                String result =
+                        authController.register(
+                                        request,
+                                        bindingResult,
+                                        redirectAttributes
+                                        );
+
+                assertEquals(
+                                "auth/register",
+                                result
+                            );
+
+                verifyNoInteractions(authService);
+        }
+        @Test
+        void validRegistrationCallsAuthService() {
+                RegisterRequestDto request =
+                        new RegisterRequestDto(
+                                        "John",
+                                        "Smith",
+                                        "johnsmith",
+                                        "john@example.com",
+                                        "CorrectHorse!Battery"
+                                        );
+
+                BindingResult bindingResult =
+                        mock(BindingResult.class);
+
+                when(bindingResult.hasErrors())
+                        .thenReturn(false);
+
+                when(authService.register(request))
+                        .thenReturn(true);
+
+                String result =
+                        authController.register(
+                                        request,
+                                        bindingResult,
+                                        redirectAttributes
+                                        );
+
+                assertEquals(
+                                "redirect:/auth/login",
+                                result
+                            );
+
+                verify(authService)
+                        .register(request);
+        }
 }

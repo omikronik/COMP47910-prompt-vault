@@ -887,3 +887,7 @@ tbody tr:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
+
+.text-danger {
+  color: var(--danger);
+}

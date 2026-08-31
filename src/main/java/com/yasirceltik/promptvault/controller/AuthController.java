@@ -3,6 +3,8 @@ package com.yasirceltik.promptvault.controller;
 import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,7 @@ import com.yasirceltik.promptvault.service.AuthService;
 import com.yasirceltik.promptvault.service.SessionRegistryService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,21 +66,33 @@ public class AuthController {
 	}
 
 	@GetMapping("/register")
-	public String registerPage() {
+	public String registerPage(Model model) {
+		model.addAttribute(
+				"registerRequest", 
+				new RegisterRequestDto("","","","","")
+				);
 		return "auth/register";
 	}
 
 	@PostMapping("/register")
-	public String register(@ModelAttribute RegisterRequestDto registerRequest,
+	public String register(
+			@Valid @ModelAttribute("registerRequest") RegisterRequestDto registerRequest,
+			BindingResult bindingResult,
 			RedirectAttributes redirectAttributes) {
+
+		if (bindingResult.hasErrors()) {
+			return "auth/register";
+		}
+
 		boolean success = authService.register(registerRequest);
 
 		if (!success) {
-			redirectAttributes.addFlashAttribute("error", "An account with that email or username already exists.");
-			return "redirect:/auth/register";
+			bindingResult.reject("account.exists","An account with that email or username already exists.");
+			return "auth/register";
 		}
 
 		redirectAttributes.addFlashAttribute("success", "Account created. You can now sign in.");
+
 		return "redirect:/auth/login";
 	}
 
@@ -86,7 +101,7 @@ public class AuthController {
 		SessionUserDto principal = (SessionUserDto) session.getAttribute("user");
 
 		if (principal != null) {
-			sessionRegistryService.unregister(principal.id(), session);
+			sessionRegistryService.unregister(principal.id(), session);	
 		}
 
 		session.invalidate();
