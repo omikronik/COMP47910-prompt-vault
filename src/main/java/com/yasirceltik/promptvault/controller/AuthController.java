@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yasirceltik.promptvault.dto.LoginRequestDto;
 import com.yasirceltik.promptvault.dto.RegisterRequestDto;
+import com.yasirceltik.promptvault.dto.SessionUserDto;
 import com.yasirceltik.promptvault.model.User;
 import com.yasirceltik.promptvault.service.AuthService;
 
@@ -44,7 +45,16 @@ public class AuthController {
 			return "redirect:/auth/login";
 		}
 
-		session.setAttribute("user", user.get());
+		// only expose minimal user details to session
+		User authenticatedUser = user.get();
+		SessionUserDto sessionUser = new SessionUserDto(
+				authenticatedUser.getId(),
+				authenticatedUser.getUsername(),
+				authenticatedUser.getEmail(),
+				authenticatedUser.getRole()
+				);
+
+		session.setAttribute("user", sessionUser);
 		log.info("Successful login attempt for {}", loginRequest.email());
 		return "redirect:/dashboard";
 	}

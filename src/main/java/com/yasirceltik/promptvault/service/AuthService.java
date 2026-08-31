@@ -2,6 +2,7 @@ package com.yasirceltik.promptvault.service;
 
 import java.util.Optional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +18,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthService {
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	public Optional<User> login(LoginRequestDto request) {
 		return userRepository.findByEmail(request.email())
-				.filter(u -> u.getPassword().equals(request.password()))
-				.filter(User::isActive);
+			.filter(User::isActive)
+			.filter(user ->
+					passwordEncoder.matches(
+						request.password(),
+						user.getPassword()
+						));
+
 	}
 
 	@Transactional
@@ -38,7 +45,7 @@ public class AuthService {
 				.lastName(request.lastName())
 				.username(request.username())
 				.email(request.email())
-				.password(request.password())
+				.password(passwordEncoder.encode(request.password()))
 				.role(UserRole.USER)
 				.active(true)
 				.build();

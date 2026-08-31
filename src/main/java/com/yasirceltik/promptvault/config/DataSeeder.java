@@ -3,6 +3,7 @@ package com.yasirceltik.promptvault.config;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.yasirceltik.promptvault.model.ChatRole;
@@ -40,6 +41,8 @@ public class DataSeeder implements CommandLineRunner {
 	private final ConversationMessageRepository conversationMessageRepository;
 	private final MessagePolicyMatchRepository messagePolicyMatchRepository;
 
+	private final PasswordEncoder passwordEncoder;
+
 	public DataSeeder(
 			UserRepository userRepository,
 			PromptCategoryRepository promptCategoryRepository,
@@ -48,7 +51,9 @@ public class DataSeeder implements CommandLineRunner {
 			PromptPolicyMatchRepository promptPolicyMatchRepository,
 			ConversationRepository conversationRepository,
 			ConversationMessageRepository conversationMessageRepository,
-			MessagePolicyMatchRepository messagePolicyMatchRepository) {
+			MessagePolicyMatchRepository messagePolicyMatchRepository,
+			PasswordEncoder passwordEncoder
+			) {
 		this.userRepository = userRepository;
 		this.promptCategoryRepository = promptCategoryRepository;
 		this.promptRepository = promptRepository;
@@ -57,6 +62,7 @@ public class DataSeeder implements CommandLineRunner {
 		this.conversationRepository = conversationRepository;
 		this.conversationMessageRepository = conversationMessageRepository;
 		this.messagePolicyMatchRepository = messagePolicyMatchRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
@@ -89,7 +95,7 @@ public class DataSeeder implements CommandLineRunner {
 						.lastName("Testificate")
 						.username("johndoe")
 						.email("john@promptvault.com")
-						.password("Test1234")
+						.password(passwordEncoder.encode("Test1234"))
 						.role(UserRole.USER)
 						.active(true)
 						.build(),
@@ -98,7 +104,7 @@ public class DataSeeder implements CommandLineRunner {
 						.lastName("Testificate")
 						.username("janedoe")
 						.email("jane@promptvault.com")
-						.password("Test1234")
+						.password(passwordEncoder.encode("Test1234"))
 						.role(UserRole.USER)
 						.active(true)
 						.build(),
@@ -107,7 +113,7 @@ public class DataSeeder implements CommandLineRunner {
 						.lastName("Example")
 						.username("alice")
 						.email("alice@promptvault.com")
-						.password("Test1234")
+						.password(passwordEncoder.encode("Test1234"))
 						.role(UserRole.USER)
 						.active(false)
 						.build());
