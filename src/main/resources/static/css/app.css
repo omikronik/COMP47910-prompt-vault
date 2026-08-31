@@ -891,3 +891,28 @@ tbody tr:hover {
 .text-danger {
   color: var(--danger);
 }
+
+/* =========================================
+   Error page
+   ========================================= */
+
+.error-code {
+  margin-bottom: var(--space-sm);
+  color: var(--primary-light);
+  font-size: clamp(3rem, 16vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.error-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space);
+  margin-top: var(--space-xl);
+}
+
+.error-actions .btn {
+  width: 100%;
+}

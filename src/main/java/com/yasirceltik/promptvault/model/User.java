@@ -49,6 +49,9 @@ public class User {
 	@Builder.Default
 	private int loginAttempts = 0;
 
+	@Column
+	private LocalDateTime lockedUntil;
+
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdOn;

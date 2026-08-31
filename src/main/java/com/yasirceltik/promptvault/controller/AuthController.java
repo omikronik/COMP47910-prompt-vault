@@ -1,7 +1,5 @@
 package com.yasirceltik.promptvault.controller;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yasirceltik.promptvault.dto.LoginRequestDto;
+import com.yasirceltik.promptvault.dto.LoginResultDto;
 import com.yasirceltik.promptvault.dto.RegisterRequestDto;
 import com.yasirceltik.promptvault.dto.SessionUserDto;
+import com.yasirceltik.promptvault.model.LoginStatus;
 import com.yasirceltik.promptvault.model.User;
 import com.yasirceltik.promptvault.service.AuthService;
 import com.yasirceltik.promptvault.service.SessionRegistryService;
@@ -40,18 +40,22 @@ public class AuthController {
 	public String login(@ModelAttribute LoginRequestDto loginRequest,
 			HttpSession session,
 			RedirectAttributes redirectAttributes) {
-		log.info("Login attempt {}", loginRequest.email());
+		LoginResultDto loginResult = authService.login(loginRequest);
 
-		Optional<User> user = authService.login(loginRequest);
+		if (loginResult.status() == LoginStatus.LOCKED) {
+			redirectAttributes.addFlashAttribute(
+					"error",
+					"Too many failed login attempts. Please try again later.");
+			return "redirect:/auth/login";
+		}
 
-		if (user.isEmpty()) {
+		if (loginResult.status() == LoginStatus.INVALID_CREDENTIALS) {
 			redirectAttributes.addFlashAttribute("error", "Invalid email or password.");
-			log.info("Failed login attempt for {}", loginRequest.email());
 			return "redirect:/auth/login";
 		}
 
 		// only expose minimal user details to session
-		User authenticatedUser = user.get();
+		User authenticatedUser = loginResult.user();
 		SessionUserDto sessionUser = new SessionUserDto(
 				authenticatedUser.getId(),
 				authenticatedUser.getUsername(),
@@ -61,7 +65,7 @@ public class AuthController {
 
 		session.setAttribute("user", sessionUser);
 		sessionRegistryService.register(authenticatedUser.getId(), session);
-		log.info("Successful login attempt for {}", loginRequest.email());
+		log.info("Successful login for user id={}", authenticatedUser.getId());
 		return "redirect:/dashboard";
 	}
 

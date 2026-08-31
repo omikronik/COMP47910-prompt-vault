@@ -1,6 +1,7 @@
 package com.yasirceltik.promptvault.config;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,7 +12,9 @@ class SecurityConfigTest {
     @Test
     void passwordEncoderUsesBCrypt() {
         SecurityConfig config =
-                new SecurityConfig();
+                new SecurityConfig(
+                        mock(LoginRateLimitFilter.class)
+                );
 
         PasswordEncoder encoder =
                 config.passwordEncoder();
@@ -25,7 +28,9 @@ class SecurityConfigTest {
     @Test
     void passwordEncoderHashesAndVerifiesPassword() {
         SecurityConfig config =
-                new SecurityConfig();
+                new SecurityConfig(
+                        mock(LoginRateLimitFilter.class)
+                );
 
         PasswordEncoder encoder =
                 config.passwordEncoder();

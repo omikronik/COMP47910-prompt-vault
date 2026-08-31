@@ -5,8 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -15,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yasirceltik.promptvault.dto.LoginRequestDto;
+import com.yasirceltik.promptvault.dto.LoginResultDto;
 import com.yasirceltik.promptvault.dto.RegisterRequestDto;
 import com.yasirceltik.promptvault.dto.SessionUserDto;
 import com.yasirceltik.promptvault.model.User;
@@ -84,7 +83,7 @@ class AuthControllerTest {
                         .build();
 
                 when(authService.login(request))
-                        .thenReturn(Optional.of(user));
+                        .thenReturn(LoginResultDto.success(user));
 
                 String result = authController.login(
                                 request,
@@ -122,7 +121,7 @@ class AuthControllerTest {
                                 );
 
                 when(authService.login(request))
-                        .thenReturn(Optional.empty());
+                        .thenReturn(LoginResultDto.invalidCredentials());
 
                 String result = authController.login(
                                 request,
@@ -146,6 +145,36 @@ class AuthControllerTest {
                                         "error",
                                         "Invalid email or password."
                                         );
+        }
+
+        @Test
+        void lockedLoginRedirectsWithoutCreatingPrincipal() {
+                LoginRequestDto request = new LoginRequestDto(
+                                "john@example.com",
+                                "WrongPassword"
+                                );
+
+                when(authService.login(request))
+                        .thenReturn(LoginResultDto.locked(
+                                        java.time.LocalDateTime.of(
+                                                        2026, 8, 31, 7, 15
+                                                        )
+                                        ));
+
+                String result = authController.login(
+                                request,
+                                session,
+                                redirectAttributes
+                                );
+
+                assertEquals("redirect:/auth/login", result);
+                verify(session, never()).setAttribute(eq("user"), any());
+                verify(sessionRegistryService, never())
+                        .register(anyLong(), any(HttpSession.class));
+                verify(redirectAttributes).addFlashAttribute(
+                                "error",
+                                "Too many failed login attempts. Please try again later."
+                                );
         }
 
         @Test
