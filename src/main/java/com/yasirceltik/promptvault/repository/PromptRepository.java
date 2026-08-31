@@ -21,6 +21,18 @@ public interface PromptRepository extends JpaRepository<Prompt, Long> {
 
 	Optional<Prompt> findByIdAndOwner(Long id, User owner);
 
+	@Query("""
+	SELECT p
+	FROM Prompt p
+	WHERE p.id = :id
+	AND (p.owner.id = :userId OR p.visibility = :visibility)
+	""")
+	Optional<Prompt> findUsablePrompt(
+			@Param("id") Long id,
+			@Param("userId") Long userId,
+			@Param("visibility") PromptVisibility visibility
+	);
+
 	@Modifying
 	@Query("UPDATE Prompt p SET p.category = null WHERE p.category.id = :categoryId")
 	void nullifyCategoryReferences(@Param("categoryId") Long categoryId);

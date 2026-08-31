@@ -18,12 +18,14 @@ import com.yasirceltik.promptvault.dto.SessionUserDto;
 import com.yasirceltik.promptvault.model.User;
 import com.yasirceltik.promptvault.model.UserRole;
 import com.yasirceltik.promptvault.service.AuthService;
+import com.yasirceltik.promptvault.service.SessionRegistryService;
 
 import jakarta.servlet.http.HttpSession;
 
 class AuthControllerTest {
 
     private AuthService authService;
+	private SessionRegistryService sessionRegistryService;
     private AuthController authController;
     private HttpSession session;
     private RedirectAttributes redirectAttributes;
@@ -34,7 +36,7 @@ class AuthControllerTest {
         session = mock(HttpSession.class);
         redirectAttributes = mock(RedirectAttributes.class);
 
-        authController = new AuthController(authService);
+        authController = new AuthController(authService, sessionRegistryService);
     }
 
     @Test

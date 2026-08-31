@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class UserService {
 	private final UserRepository userRepository;
+	private final SessionRegistryService sessionRegistryService;
 
 	public List<User> getAllUsers() {
 		return userRepository.findAll();
@@ -31,6 +32,11 @@ public class UserService {
 	public void setActive(Long id, boolean active) {
 		User user = userRepository.findById(id).orElseThrow();
 		user.setActive(active);
+
+		if (!active) {
+			sessionRegistryService.expireSessionsForUser(id);
+		}
+
 		log.info("set user {} active={}", user.getEmail(), active);
 	}
 }

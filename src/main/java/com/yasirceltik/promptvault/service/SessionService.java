@@ -25,10 +25,13 @@ public class SessionService {
 			return null;
 		}
 
-		return userRepository.findById(principal.id()).orElse(null);
+		return userRepository
+			.findById(principal.id())
+			.filter(User::isActive)
+			.orElse(null);
 	}
 
 	public boolean isLoggedIn(HttpSession session) {
-		return getPrincipal(session) != null;
+		return getCurrentUser(session) != null;
 	}
 }

@@ -18,6 +18,8 @@ import com.yasirceltik.promptvault.repository.ConversationRepository;
 import com.yasirceltik.promptvault.repository.MessagePolicyMatchRepository;
 import com.yasirceltik.promptvault.repository.PolicyKeywordRepository;
 import com.yasirceltik.promptvault.repository.PromptRepository;
+import com.yasirceltik.promptvault.exception.PromptNotFoundException;
+import com.yasirceltik.promptvault.model.PromptVisibility;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,12 +59,17 @@ public class ConversationService {
 	public Conversation createConversation(User user, Long promptId) {
 		Prompt prompt = null;
 		String title = "New Conversation";
+		
 		if (promptId != null) {
-			prompt = promptRepository.findById(promptId).orElse(null);
-			if (prompt != null) {
-				title = prompt.getTitle();
-			}
+			prompt = promptRepository.findUsablePrompt(
+					promptId,
+					user.getId(),
+					PromptVisibility.SHARED
+					).orElseThrow(PromptNotFoundException::new);
+
+			title = prompt.getTitle();
 		}
+
 		Conversation conversation = Conversation.builder()
 				.title(title)
 				.owner(user)
@@ -70,8 +77,11 @@ public class ConversationService {
 				.prompt(prompt)
 				.policyFlagged(false)
 				.build();
+
 		Conversation saved = conversationRepository.save(conversation);
+
 		log.info("created conversation '{}' for user {}", saved.getTitle(), user.getId());
+
 		return saved;
 	}
 

@@ -14,6 +14,7 @@ import com.yasirceltik.promptvault.dto.RegisterRequestDto;
 import com.yasirceltik.promptvault.dto.SessionUserDto;
 import com.yasirceltik.promptvault.model.User;
 import com.yasirceltik.promptvault.service.AuthService;
+import com.yasirceltik.promptvault.service.SessionRegistryService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthController {
 	private final AuthService authService;
+	private final SessionRegistryService sessionRegistryService;
 
 	@GetMapping("/login")
 	public String loginPage() {
@@ -55,6 +57,7 @@ public class AuthController {
 				);
 
 		session.setAttribute("user", sessionUser);
+		sessionRegistryService.register(authenticatedUser.getId(), session);
 		log.info("Successful login attempt for {}", loginRequest.email());
 		return "redirect:/dashboard";
 	}
@@ -80,6 +83,12 @@ public class AuthController {
 
 	@PostMapping("/logout")
 	public String logout(HttpSession session) {
+		SessionUserDto principal = (SessionUserDto) session.getAttribute("user");
+
+		if (principal != null) {
+			sessionRegistryService.unregister(principal.id(), session);
+		}
+
 		session.invalidate();
 		return "redirect:/auth/login";
 	}

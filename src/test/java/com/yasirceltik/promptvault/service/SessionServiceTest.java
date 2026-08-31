@@ -48,18 +48,65 @@ class SessionServiceTest {
     }
 
     @Test
-    void isLoggedInReturnsTrueWhenPrincipalExists() {
-        SessionUserDto principal = new SessionUserDto(
-                1L,
-                "johnsmith",
-                "john@example.com",
-                UserRole.USER
-        );
+    void isLoggedInReturnsTrueWhenPrincipalExistsAndUserIsActive() {
+            SessionUserDto principal = new SessionUserDto(
+                            1L,
+                            "johnsmith",
+                            "john@example.com",
+                            UserRole.USER
+                            );
 
-        when(session.getAttribute("user"))
-                .thenReturn(principal);
+            User user = User.builder()
+                    .id(1L)
+                    .username("johnsmith")
+                    .email("john@example.com")
+                    .role(UserRole.USER)
+                    .active(true)
+                    .build();
 
-        assertTrue(sessionService.isLoggedIn(session));
+            when(session.getAttribute("user"))
+                    .thenReturn(principal);
+
+            when(userRepository.findById(1L))
+                    .thenReturn(Optional.of(user));
+
+            assertTrue(
+                            sessionService.isLoggedIn(session)
+                      );
+
+            verify(userRepository)
+                    .findById(1L);
+    }
+
+    @Test
+    void isLoggedInReturnsFalseWhenUserHasBeenDisabled() {
+            SessionUserDto principal = new SessionUserDto(
+                            1L,
+                            "johnsmith",
+                            "john@example.com",
+                            UserRole.USER
+                            );
+
+            User user = User.builder()
+                    .id(1L)
+                    .username("johnsmith")
+                    .email("john@example.com")
+                    .role(UserRole.USER)
+                    .active(false)
+                    .build();
+
+            when(session.getAttribute("user"))
+                    .thenReturn(principal);
+
+            when(userRepository.findById(1L))
+                    .thenReturn(Optional.of(user));
+
+            assertFalse(
+                            sessionService.isLoggedIn(session)
+                       );
+
+            verify(userRepository)
+                    .findById(1L);
     }
 
     @Test

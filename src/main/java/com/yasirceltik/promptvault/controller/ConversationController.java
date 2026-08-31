@@ -29,8 +29,6 @@ public class ConversationController {
 	@PostMapping("/start")
 	public String startConversation(@RequestParam(required = false) Long promptId, HttpSession session) {
 		User user = sessionService.getCurrentUser(session);
-		if (user == null)
-			return "redirect:/auth/login";
 
 		Conversation conversation = conversationService.createConversation(user, promptId);
 		return "redirect:/conversations/" + conversation.getId();
@@ -39,8 +37,6 @@ public class ConversationController {
 	@GetMapping("/{id}")
 	public String viewConversation(@PathVariable Long id, HttpSession session, Model model) {
 		User user = sessionService.getCurrentUser(session);
-		if (user == null)
-			return "redirect:/auth/login";
 
 		Conversation conversation = conversationService.getConversationByIdAndOwnerId(id, user.getId())
 				.orElseThrow();
@@ -55,8 +51,6 @@ public class ConversationController {
 	@PostMapping("/{id}/messages")
 	public String sendMessage(@PathVariable Long id, @RequestParam String content, HttpSession session) {
 		User user = sessionService.getCurrentUser(session);
-		if (user == null)
-			return "redirect:/auth/login";
 
 		conversationService.sendMessage(id, content, user.getId());
 		return "redirect:/conversations/" + id;

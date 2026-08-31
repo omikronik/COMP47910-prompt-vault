@@ -26,12 +26,19 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         HttpSession session = request.getSession(false);
 
-        if (session == null || !sessionService.isLoggedIn(session)) {
+        if (session == null) {
             response.sendRedirect("/auth/login");
             return false;
         }
 
         User user = sessionService.getCurrentUser(session);
+
+        if (user == null) {
+			session.invalidate();
+            response.sendRedirect("/auth/login");
+            return false;
+        }
+
         String path = request.getRequestURI();
 
         if (path.startsWith("/admin/")

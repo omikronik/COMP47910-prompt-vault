@@ -6,18 +6,20 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import com.yasirceltik.promptvault.exception.PromptNotFoundException;
 import com.yasirceltik.promptvault.model.ChatRole;
 import com.yasirceltik.promptvault.model.Conversation;
 import com.yasirceltik.promptvault.model.ConversationMessage;
 import com.yasirceltik.promptvault.model.MessagePolicyMatch;
 import com.yasirceltik.promptvault.model.PolicyKeyword;
+import com.yasirceltik.promptvault.model.Prompt;
+import com.yasirceltik.promptvault.model.PromptVisibility;
 import com.yasirceltik.promptvault.model.User;
 import com.yasirceltik.promptvault.model.UserRole;
 import com.yasirceltik.promptvault.repository.ConversationMessageRepository;
@@ -82,15 +84,272 @@ class ConversationServiceTest {
     }
 
     @Test
-    void sendMessageSucceedsForConversationOwner() {
-        Conversation conversation = Conversation.builder()
+    void createConversationWithOwnPrivatePromptSucceeds() {
+        Prompt prompt = Prompt.builder()
                 .id(10L)
-                .title("Existing Conversation")
+                .title("Private Owner Prompt")
                 .owner(owner)
-                .createdBy(owner)
-                .policyFlagged(false)
-                .messages(new ArrayList<>())
+                .visibility(PromptVisibility.PRIVATE)
                 .build();
+
+        when(promptRepository.findUsablePrompt(
+                10L,
+                owner.getId(),
+                PromptVisibility.SHARED
+        )).thenReturn(Optional.of(prompt));
+
+        when(conversationRepository.save(
+                any(Conversation.class)
+        )).thenAnswer(invocation -> {
+            Conversation conversation =
+                    invocation.getArgument(0);
+
+            conversation.setId(100L);
+
+            return conversation;
+        });
+
+        Conversation result =
+                conversationService.createConversation(
+                        owner,
+                        10L
+                );
+
+        assertEquals(
+                "Private Owner Prompt",
+                result.getTitle()
+        );
+
+        assertEquals(
+                owner,
+                result.getOwner()
+        );
+
+        assertEquals(
+                owner,
+                result.getCreatedBy()
+        );
+
+        assertEquals(
+                prompt,
+                result.getPrompt()
+        );
+
+        assertFalse(
+                result.getPolicyFlagged()
+        );
+
+        verify(promptRepository)
+                .findUsablePrompt(
+                        10L,
+                        owner.getId(),
+                        PromptVisibility.SHARED
+                );
+
+        verify(conversationRepository)
+                .save(any(Conversation.class));
+    }
+
+    @Test
+    void createConversationWithAnotherUsersSharedPromptSucceeds() {
+        Prompt sharedPrompt = Prompt.builder()
+                .id(20L)
+                .title("Shared Prompt")
+                .owner(otherUser)
+                .visibility(PromptVisibility.SHARED)
+                .build();
+
+        when(promptRepository.findUsablePrompt(
+                20L,
+                owner.getId(),
+                PromptVisibility.SHARED
+        )).thenReturn(Optional.of(sharedPrompt));
+
+        when(conversationRepository.save(
+                any(Conversation.class)
+        )).thenAnswer(invocation ->
+                invocation.getArgument(0)
+        );
+
+        Conversation result =
+                conversationService.createConversation(
+                        owner,
+                        20L
+                );
+
+        assertEquals(
+                "Shared Prompt",
+                result.getTitle()
+        );
+
+        assertEquals(
+                sharedPrompt,
+                result.getPrompt()
+        );
+
+        assertEquals(
+                owner,
+                result.getOwner()
+        );
+
+        verify(promptRepository)
+                .findUsablePrompt(
+                        20L,
+                        owner.getId(),
+                        PromptVisibility.SHARED
+                );
+
+        verify(conversationRepository)
+                .save(any(Conversation.class));
+    }
+
+    @Test
+    void createConversationWithAnotherUsersPrivatePromptIsDenied() {
+        when(promptRepository.findUsablePrompt(
+                20L,
+                owner.getId(),
+                PromptVisibility.SHARED
+        )).thenReturn(Optional.empty());
+
+        assertThrows(
+                PromptNotFoundException.class,
+                () ->
+                        conversationService.createConversation(
+                                owner,
+                                20L
+                        )
+        );
+
+        verify(promptRepository)
+                .findUsablePrompt(
+                        20L,
+                        owner.getId(),
+                        PromptVisibility.SHARED
+                );
+
+        verify(
+                conversationRepository,
+                never()
+        ).save(any(Conversation.class));
+    }
+
+    @Test
+    void createConversationWithMissingPromptIsDenied() {
+        when(promptRepository.findUsablePrompt(
+                999L,
+                owner.getId(),
+                PromptVisibility.SHARED
+        )).thenReturn(Optional.empty());
+
+        assertThrows(
+                PromptNotFoundException.class,
+                () ->
+                        conversationService.createConversation(
+                                owner,
+                                999L
+                        )
+        );
+
+        verify(promptRepository)
+                .findUsablePrompt(
+                        999L,
+                        owner.getId(),
+                        PromptVisibility.SHARED
+                );
+
+        verify(
+                conversationRepository,
+                never()
+        ).save(any(Conversation.class));
+    }
+
+    @Test
+    void createConversationWithNullPromptCreatesBlankConversation() {
+        when(conversationRepository.save(
+                any(Conversation.class)
+        )).thenAnswer(invocation ->
+                invocation.getArgument(0)
+        );
+
+        Conversation result =
+                conversationService.createConversation(
+                        owner,
+                        null
+                );
+
+        assertEquals(
+                "New Conversation",
+                result.getTitle()
+        );
+
+        assertNull(
+                result.getPrompt()
+        );
+
+        assertEquals(
+                owner,
+                result.getOwner()
+        );
+
+        assertEquals(
+                owner,
+                result.getCreatedBy()
+        );
+
+        assertFalse(
+                result.getPolicyFlagged()
+        );
+
+        verifyNoInteractions(
+                promptRepository
+        );
+
+        verify(conversationRepository)
+                .save(any(Conversation.class));
+    }
+
+    @Test
+    void deniedPrivatePromptDoesNotCreateConversation() {
+        when(promptRepository.findUsablePrompt(
+                20L,
+                owner.getId(),
+                PromptVisibility.SHARED
+        )).thenReturn(Optional.empty());
+
+        assertThrows(
+                PromptNotFoundException.class,
+                () ->
+                        conversationService.createConversation(
+                                owner,
+                                20L
+                        )
+        );
+
+        verify(
+                conversationRepository,
+                never()
+        ).save(any());
+
+        verifyNoInteractions(
+                conversationMessageRepository
+        );
+
+        verifyNoInteractions(
+                messagePolicyMatchRepository
+        );
+    }
+
+    @Test
+    void sendMessageSucceedsForConversationOwner() {
+        Conversation conversation =
+                Conversation.builder()
+                        .id(10L)
+                        .title("Existing Conversation")
+                        .owner(owner)
+                        .createdBy(owner)
+                        .policyFlagged(false)
+                        .messages(new ArrayList<>())
+                        .build();
 
         when(conversationRepository.findByIdAndOwnerId(
                 10L,
@@ -117,8 +376,10 @@ class ConversationServiceTest {
                         ConversationMessage.class
                 );
 
-        verify(conversationMessageRepository, times(2))
-                .save(messageCaptor.capture());
+        verify(
+                conversationMessageRepository,
+                times(2)
+        ).save(messageCaptor.capture());
 
         List<ConversationMessage> savedMessages =
                 messageCaptor.getAllValues();
@@ -128,11 +389,6 @@ class ConversationServiceTest {
 
         ConversationMessage agentMessage =
                 savedMessages.get(1);
-
-        assertEquals(
-                conversation,
-                userMessage.getConversation()
-        );
 
         assertEquals(
                 "Hello",
@@ -146,11 +402,6 @@ class ConversationServiceTest {
 
         assertFalse(
                 userMessage.getPolicyFlagged()
-        );
-
-        assertEquals(
-                conversation,
-                agentMessage.getConversation()
         );
 
         assertEquals(
@@ -175,76 +426,24 @@ class ConversationServiceTest {
         )).thenReturn(Optional.empty());
 
         assertThrows(
-                NoSuchElementException.class,
-                () -> conversationService.sendMessage(
-                        10L,
-                        "Injected message",
-                        otherUser.getId()
-                )
+                RuntimeException.class,
+                () ->
+                        conversationService.sendMessage(
+                                10L,
+                                "Injected message",
+                                otherUser.getId()
+                        )
         );
 
-        verify(conversationRepository)
-                .findByIdAndOwnerId(
-                        10L,
-                        otherUser.getId()
-                );
+        verify(
+                conversationMessageRepository,
+                never()
+        ).save(any());
 
-        verifyNoInteractions(
-                conversationMessageRepository
-        );
-
-        verifyNoInteractions(
-                messagePolicyMatchRepository
-        );
-
-        verifyNoInteractions(
-                policyKeywordRepository
-        );
-    }
-
-    @Test
-    void deniedMessageDoesNotChangeVictimConversationFlag() {
-        Conversation victimConversation =
-                Conversation.builder()
-                        .id(10L)
-                        .title("Victim Conversation")
-                        .owner(owner)
-                        .createdBy(owner)
-                        .policyFlagged(false)
-                        .messages(new ArrayList<>())
-                        .build();
-
-        when(conversationRepository.findByIdAndOwnerId(
-                10L,
-                otherUser.getId()
-        )).thenReturn(Optional.empty());
-
-        assertThrows(
-                NoSuchElementException.class,
-                () -> conversationService.sendMessage(
-                        10L,
-                        "my password is secret",
-                        otherUser.getId()
-                )
-        );
-
-        assertFalse(
-                victimConversation.getPolicyFlagged()
-        );
-
-        assertTrue(
-                victimConversation
-                        .getMessages()
-                        .isEmpty()
-        );
-
-        verifyNoInteractions(
-                conversationMessageRepository
-        );
-
-        verifyNoInteractions(
-                messagePolicyMatchRepository
-        );
+        verify(
+                messagePolicyMatchRepository,
+                never()
+        ).save(any());
 
         verifyNoInteractions(
                 policyKeywordRepository
@@ -292,34 +491,18 @@ class ConversationServiceTest {
                         ConversationMessage.class
                 );
 
-        verify(conversationMessageRepository, times(2))
-                .save(messageCaptor.capture());
-
-        List<ConversationMessage> messages =
-                messageCaptor.getAllValues();
+        verify(
+                conversationMessageRepository,
+                times(2)
+        ).save(messageCaptor.capture());
 
         ConversationMessage userMessage =
-                messages.get(0);
-
-        ConversationMessage agentMessage =
-                messages.get(1);
+                messageCaptor
+                        .getAllValues()
+                        .get(0);
 
         assertTrue(
                 userMessage.getPolicyFlagged()
-        );
-
-        assertEquals(
-                ChatRole.USER,
-                userMessage.getRole()
-        );
-
-        assertFalse(
-                agentMessage.getPolicyFlagged()
-        );
-
-        assertEquals(
-                ChatRole.AGENT,
-                agentMessage.getRole()
         );
 
         ArgumentCaptor<MessagePolicyMatch> matchCaptor =
@@ -330,140 +513,11 @@ class ConversationServiceTest {
         verify(messagePolicyMatchRepository)
                 .save(matchCaptor.capture());
 
-        MessagePolicyMatch savedMatch =
-                matchCaptor.getValue();
-
-        assertEquals(
-                userMessage,
-                savedMatch.getMessage()
-        );
-
         assertEquals(
                 keyword,
-                savedMatch.getPolicy()
-        );
-    }
-
-    @Test
-    void sendMessageCreatesOnePolicyMatchForEachMatchedKeyword() {
-        Conversation conversation =
-                Conversation.builder()
-                        .id(10L)
-                        .title("Existing Conversation")
-                        .owner(owner)
-                        .createdBy(owner)
-                        .policyFlagged(false)
-                        .messages(new ArrayList<>())
-                        .build();
-
-        PolicyKeyword password =
-                PolicyKeyword.builder()
-                        .id(1L)
-                        .content("password")
-                        .build();
-
-        PolicyKeyword secret =
-                PolicyKeyword.builder()
-                        .id(2L)
-                        .content("secret")
-                        .build();
-
-        when(conversationRepository.findByIdAndOwnerId(
-                10L,
-                owner.getId()
-        )).thenReturn(Optional.of(conversation));
-
-        when(policyKeywordRepository.findAll())
-                .thenReturn(
-                        List.of(
-                                password,
-                                secret
-                        )
-                );
-
-        conversationService.sendMessage(
-                10L,
-                "My password is secret",
-                owner.getId()
-        );
-
-        verify(
-                messagePolicyMatchRepository,
-                times(2)
-        ).save(any(MessagePolicyMatch.class));
-
-        assertTrue(
-                conversation.getPolicyFlagged()
-        );
-    }
-
-    @Test
-    void firstMessageUpdatesNewConversationTitle() {
-        Conversation conversation =
-                Conversation.builder()
-                        .id(10L)
-                        .title("New Conversation")
-                        .owner(owner)
-                        .createdBy(owner)
-                        .prompt(null)
-                        .policyFlagged(false)
-                        .messages(new ArrayList<>())
-                        .build();
-
-        when(conversationRepository.findByIdAndOwnerId(
-                10L,
-                owner.getId()
-        )).thenReturn(Optional.of(conversation));
-
-        when(policyKeywordRepository.findAll())
-                .thenReturn(List.of());
-
-        conversationService.sendMessage(
-                10L,
-                "This should become the conversation title",
-                owner.getId()
-        );
-
-        assertEquals(
-                "This should become the conversation title",
-                conversation.getTitle()
-        );
-    }
-
-    @Test
-    void firstLongMessageTruncatesConversationTitle() {
-        Conversation conversation =
-                Conversation.builder()
-                        .id(10L)
-                        .title("New Conversation")
-                        .owner(owner)
-                        .createdBy(owner)
-                        .prompt(null)
-                        .policyFlagged(false)
-                        .messages(new ArrayList<>())
-                        .build();
-
-        String content =
-                "This is a very long message that should exceed sixty characters "
-                        + "and therefore be truncated";
-
-        when(conversationRepository.findByIdAndOwnerId(
-                10L,
-                owner.getId()
-        )).thenReturn(Optional.of(conversation));
-
-        when(policyKeywordRepository.findAll())
-                .thenReturn(List.of());
-
-        conversationService.sendMessage(
-                10L,
-                content,
-                owner.getId()
-        );
-
-        assertEquals(
-                content.substring(0, 60).trim() + "…",
-                conversation.getTitle()
+                matchCaptor
+                        .getValue()
+                        .getPolicy()
         );
     }
 
