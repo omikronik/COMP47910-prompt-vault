@@ -19,6 +19,7 @@ import com.yasirceltik.promptvault.repository.MessagePolicyMatchRepository;
 import com.yasirceltik.promptvault.repository.PolicyKeywordRepository;
 import com.yasirceltik.promptvault.repository.PromptRepository;
 import com.yasirceltik.promptvault.exception.PromptNotFoundException;
+import com.yasirceltik.promptvault.exception.ConversationNotFoundException;
 import com.yasirceltik.promptvault.model.PromptVisibility;
 
 import lombok.RequiredArgsConstructor;
@@ -87,7 +88,8 @@ public class ConversationService {
 
 	@Transactional
 	public void sendMessage(Long conversationId, String content, Long userId) {
-		Conversation conversation = conversationRepository.findByIdAndOwnerId(conversationId, userId).orElseThrow();
+		Conversation conversation = conversationRepository.findByIdAndOwnerId(conversationId, userId)
+				.orElseThrow(ConversationNotFoundException::new);
 
 		List<PolicyKeyword> keywords = policyKeywordRepository.findAll();
 		String contentLower = content.toLowerCase();
@@ -134,10 +136,10 @@ public class ConversationService {
 	@Transactional
 	public void deleteConversation(Long id, User user) {
 		Conversation conversation = conversationRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Conversation not found"));
+				.orElseThrow(ConversationNotFoundException::new);
 
 		if (conversation.getOwner().getId() != user.getId()) {
-			throw new RuntimeException(user.getId() + " attempted to delete conversation not owned");
+			throw new ConversationNotFoundException();
 		}
 
 		conversationRepository.delete(conversation);

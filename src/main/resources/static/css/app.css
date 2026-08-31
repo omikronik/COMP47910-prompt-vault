@@ -917,6 +917,13 @@ tbody tr:hover {
   width: 100%;
 }
 
+.error-reference {
+  margin-top: var(--space-lg);
+  font-family: monospace;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
 /* =========================================
    CSP-safe presentation helpers
    ========================================= */

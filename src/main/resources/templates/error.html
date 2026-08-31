@@ -33,6 +33,20 @@
             </p>
           </div>
 
+          <div th:case="400">
+            <h1>Invalid request</h1>
+            <p class="text-muted">
+              Check the submitted information and try again.
+            </p>
+          </div>
+
+          <div th:case="409">
+            <h1>Request conflict</h1>
+            <p class="text-muted">
+              The request conflicts with existing PromptVault data.
+            </p>
+          </div>
+
           <div th:case="500">
             <h1>Something went wrong</h1>
             <p class="text-muted">
@@ -47,6 +61,10 @@
             </p>
           </div>
         </div>
+
+        <p class="error-reference" th:if="${correlationId != null}">
+          Reference: <span th:text="${correlationId}">reference</span>
+        </p>
 
         <div class="error-actions">
           <a class="btn" th:href="@{/dashboard}">Return to dashboard</a>
