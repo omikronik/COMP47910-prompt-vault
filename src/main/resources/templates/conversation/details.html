@@ -50,6 +50,7 @@
           th:action="@{/conversations/{id}/messages(id=${conversation.id})}"
           id="chat-form"
         >
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <div class="chat-input-row">
             <textarea
               id="chat-textarea"

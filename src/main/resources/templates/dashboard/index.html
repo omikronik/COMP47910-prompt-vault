@@ -16,6 +16,7 @@
           <p class="text-muted">Your past AI conversations.</p>
         </div>
         <form method="post" th:action="@{/conversations/start}">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <button class="btn" type="submit">New Conversation</button>
         </form>
       </div>
@@ -29,6 +30,7 @@
         >
           <a class="btn btn-secondary" th:href="@{/prompts}">My Prompts</a>
           <form method="post" th:action="@{/conversations/start}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <button class="btn" type="submit">New Conversation</button>
           </form>
         </div>

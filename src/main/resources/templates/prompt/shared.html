@@ -59,6 +59,7 @@
 
           <div class="row mt-lg">
             <form method="post" th:action="@{/conversations/start}">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <input type="hidden" name="promptId" th:value="${prompt.id}" />
               <button class="btn btn-secondary btn-sm" type="submit">
                 Use
