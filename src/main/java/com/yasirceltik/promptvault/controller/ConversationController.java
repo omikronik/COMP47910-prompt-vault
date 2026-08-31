@@ -42,16 +42,13 @@ public class ConversationController {
 		if (user == null)
 			return "redirect:/auth/login";
 
-		Conversation conversation = conversationService.getConversationById(id)
-				.orElseThrow(() -> new RuntimeException("Conversation not found"));
+		Conversation conversation = conversationService.getConversationByIdAndOwnerId(id, user.getId())
+				.orElseThrow();
 
-		if (conversation.getOwner().getId() != user.getId()) {
-			return "redirect:/dashboard";
-		}
-
-		List<ConversationMessage> messages = conversationService.getMessages(id);
+		List<ConversationMessage> messages = conversationService.getMessages(conversation);
 		model.addAttribute("conversation", conversation);
 		model.addAttribute("messages", messages);
+
 		return "conversation/details";
 	}
 
@@ -61,7 +58,7 @@ public class ConversationController {
 		if (user == null)
 			return "redirect:/auth/login";
 
-		conversationService.sendMessage(id, content, user);
+		conversationService.sendMessage(id, content, user.getId());
 		return "redirect:/conversations/" + id;
 	}
 }

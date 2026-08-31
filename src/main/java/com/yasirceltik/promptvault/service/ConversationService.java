@@ -41,8 +41,11 @@ public class ConversationService {
 		return conversationRepository.findById(id);
 	}
 
-	public List<ConversationMessage> getMessages(Long conversationId) {
-		Conversation conversation = conversationRepository.findById(conversationId).orElseThrow();
+	public Optional<Conversation> getConversationByIdAndOwnerId(Long id, Long ownerId) {
+		return conversationRepository.findByIdAndOwnerId(id, ownerId);
+	}
+
+	public List<ConversationMessage> getMessages(Conversation conversation) {
 		return conversationMessageRepository.findByConversationOrderByCreatedOnAsc(conversation);
 	}
 
@@ -73,8 +76,8 @@ public class ConversationService {
 	}
 
 	@Transactional
-	public void sendMessage(Long conversationId, String content, User user) {
-		Conversation conversation = conversationRepository.findById(conversationId).orElseThrow();
+	public void sendMessage(Long conversationId, String content, Long userId) {
+		Conversation conversation = conversationRepository.findByIdAndOwnerId(conversationId, userId).orElseThrow();
 
 		List<PolicyKeyword> keywords = policyKeywordRepository.findAll();
 		String contentLower = content.toLowerCase();

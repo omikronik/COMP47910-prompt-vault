@@ -1,6 +1,7 @@
 package com.yasirceltik.promptvault.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,6 +15,8 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
 	List<Conversation> findByOwnerOrderByCreatedOnDesc(User user);
 
 	List<Conversation> findByPolicyFlaggedTrue();
+
+	Optional<Conversation> findByIdAndOwnerId(Long id, Long ownerId);
 
 	@Modifying
 	@Query("UPDATE Conversation c SET c.prompt = null WHERE c.prompt.id = :promptId")

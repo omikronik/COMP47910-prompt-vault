@@ -74,17 +74,17 @@ public class PromptService {
 		String contentLowercase = dto.content().toLowerCase();
 
 		List<PolicyKeyword> matches = keywords.stream()
-				.filter(kw -> contentLowercase.contains(kw.getContent().toLowerCase()))
-				.toList();
+			.filter(kw -> contentLowercase.contains(kw.getContent().toLowerCase()))
+			.toList();
 
 		Prompt prompt = Prompt.builder()
-				.title(dto.title())
-				.content(dto.content())
-				.visibility(dto.visibility())
-				.owner(user)
-				.category(category)
-				.policyFlagged(!matches.isEmpty())
-				.build();
+			.title(dto.title())
+			.content(dto.content())
+			.visibility(dto.visibility())
+			.owner(user)
+			.category(category)
+			.policyFlagged(!matches.isEmpty())
+			.build();
 
 		promptRepository.save(prompt);
 
